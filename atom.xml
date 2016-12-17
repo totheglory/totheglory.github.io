@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-12-11T03:16:23.000Z</updated>
+  <updated>2016-12-17T03:10:27.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -16,17 +16,51 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>chubby</title>
-    <link href="http://yoursite.com/2016/12/10/chubby/"/>
-    <id>http://yoursite.com/2016/12/10/chubby/</id>
-    <published>2016-12-10T03:52:02.000Z</published>
-    <updated>2016-12-11T03:16:23.000Z</updated>
+    <title>paxosinchubby</title>
+    <link href="http://yoursite.com/2016/12/12/paxosinchubby/"/>
+    <id>http://yoursite.com/2016/12/12/paxosinchubby/</id>
+    <published>2016-12-12T11:49:32.000Z</published>
+    <updated>2016-12-17T03:10:27.000Z</updated>
     
-    <content type="html"><![CDATA[<p>###chubby</p>
+    <content type="html"><![CDATA[<p><strong>paxos在chbby中的应用</strong></p>
+<blockquote>
+<p>paxos算法的作用就在于保证chubby集群内各个副本节点的日志能够保持一致。<br>chubby事务日志中的每个value对应的Paxos算法中的一个instance。在整个chubby运行过程中，会存在多个Paxos instance。chubby会为每个Paxos instance按序分配一个全局唯一的Instance编号，并顺序写入tvirsConfigMapper到事务日志中去。在多模式下，为了提升算法执行的性能，就必须选举出一个副本节点作为paxos算法的主节点，以避免多个Paxos Round并存的情况。<br>具体地：prepare-&gt;promise-&gt;propose-&gt;accept</p>
+<ol>
+<li>当前至多存在k个未达成一致的Instance，将这些未决的instance各自最后接受的提案值(若尚未接受任何值,则用null来代替。)作为promise消息返回。</li>
+<li>判断N是否大于当前Acceptor的最大提案编号，如果大于该值，则标记所有未决instance和所有未来的instance的最大提案编号为n，这样未决的和所有未来的instance都不能接受提案编号小于n的提案。<br>在master稳定的情况下，只需要使用一个相同的编号来执行每个instance的promise-&gt;accept模式，一旦在单个的instance中接收到了多数派的Accept反馈，即可将对应的提案值写入本地事务日志并广播commit消息告诉集群中的其他副本节点，以便于其他副本节点写入。如果某台宕机，可以主动向其他副本节点进行查询。</li>
+</ol>
+</blockquote>
+<p><strong>chubby的数据库层</strong></p>
+<blockquote>
+<p>数据快照+事务日志，定期的数据快照避免日志过大，造成的宕机恢复时间较长。如果磁盘损坏，只能从其他副本节点索取全量的状态数据了。另外如果磁盘未损坏，宕机瞬间丢失的日志数据也可以通过其他副本节点做恢复。</p>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;strong&gt;paxos在chbby中的应用&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;paxos算法的作用就在于保证chubby集群内各个副本节点的日志能够保持一致。&lt;br&gt;chubby事务日志中的每个value对应的Paxos算法中的一个instanc
+    
+    </summary>
+    
+    
+      <category term="chubby paxos" scheme="http://yoursite.com/tags/chubby-paxos/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>chubby</title>
+    <link href="http://yoursite.com/2016/10/22/chubby/"/>
+    <id>http://yoursite.com/2016/10/22/chubby/</id>
+    <published>2016-10-22T05:52:42.000Z</published>
+    <updated>2016-12-17T03:18:25.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><strong>chubby</strong></p>
 <blockquote>
 <p><em>Chubby系统架构</em></p>
-<p>大致如下图所示：<br><img src="/2016/12/10/chubby/chubby架构.jpg" title="chubby架构"><br>一个由chubby cell组成的chubby server集群,客户端的chubby lib通过Rpc协议与服务端进行通讯，chubby cell之间通过paxos算法选举server中的master。</p>
-<p><em>目录与文件</em><br>chubby的数据结构可以看作是一个由文件和目录组成的树。<br>/chubby节点的公共前缀/chubby集群的名字/业务的相对路径, Chubby服务器内部可以解析并定位到数据节点。</p>
+<p>大致如下图所示：<br>一个由chubby cell组成的chubby server集群,客户端的chubby lib通过Rpc协议与服务端进行通讯，chubby cell之间通过paxos算法选举server中的master。</p>
+<p><em>目录与文件</em><br>chubby的数据结构可以看作是一个由文件和目录组成的树。/chubby节点的公共前缀/chubby集群的名字/业务的相对路径, Chubby服务器内部可以解析并定位到数据节点。</p>
 <p>chubby 包括acl元信息，及四个单调递增的64位编码。<br>实例编码，文件内容编码，锁编码，ACL编码<br>消息乱序或延迟造成锁失效。如一个客户端c1获取到了互斥锁L，并且在锁L的保护下发出的请求R，但请求R迟迟没有到达服务器，这时应用程序会认为该客户端进程已经失败，于是便会为另一个客户端C2分配了锁L，然后再重新发送请求R，并且成功的应用到了服务器上，此时，不幸的事情发生了，客户端C1的请求R在经过一波三折之后也到达了服务端，</p>
 <p>chubby中任意一个数据节点都可以充当一个读写锁来使用，一种是单个客户端以排他(写)模式持有这个锁，另一种则是任意数目的客户端以共享(读)模式持有这个锁。<br>chubby舍弃了严格的强制锁，客户端可以在没有获取任何锁的情况下访问chubby的文件。</p>
 <p>chubby中解决消息延迟和重排序引起的分布式锁问题，采用锁延迟和锁序列器两种策略。chubby 客户端以正常的方式主动释放一个锁，那么chubby服务端将会允许其他客户端能够立即获取到该锁。<br>如果是因为客户端异常而被释放的话，那么chubby服务器会为该锁保留一定的时间，称之为锁延迟。<br>锁序列器,该策略需要chubby的上层应用配合在代码中加入相应的修改逻辑。</p>
@@ -35,16 +69,16 @@
 <p>chubby服务端处理客户端的保持连接的请求，收到后会先阻塞等待该客户端的租期即将过期时，才会对它的租期进行续租，续租后向客户端返回保持连接请求的应答。<br>chubby的租期会话时间默认为12s，但会根据具体负载进行调节。<br>客户端收到保持连接的响应后，会立即向服务端发一个保持连接的请求，服务端再次阻塞。</p>
 <hr>
 <p>chubby master选举后的基本流程<br>1.master选举后，会确定master周期，master周期确定后，如果再收到客户端携带的其他master的编号的请求，则会拒绝。并告知客户端更新master的编号。master只要发生重新选取，即需要重新确定周期。<br>2.选举产生的新的master会立即对寻址的客户端请求进行响应，但不会立即对客户端的会话请求进行处理。<br>3.master会根据本地存储的会话和锁信息，来构建服务器内存状态。<br>4.master处理客户端的keepalive请求。<br>5.master向所有客户端发送一个故障切换的请求，等待所有的客户端接收到侯清空本地缓存，警告上层缓存失效。并应答回master。<br>6.master开始处理会话级的请求。如果客户端调用了一个故障切换前创建的句柄，当前的master会重新创建合格内存对象。</p>
-<p>paxos协议<br>chubby的服务端架构<br>1.容错日志系统，通过paxos算法保证最终日志一致性以及容错性。<br>2.容错数据库，通过下层的日志来保证一致性和容错性。<br>3.分布式锁和小文件存储服务。<br><img src="/2016/12/10/chubby/chubby.jpg" title="chubby server"></p>
+<p>paxos协议<br>chubby的服务端架构<br>1.容错日志系统，通过paxos算法保证最终日志一致性以及容错性。<br>2.容错数据库，通过下层的日志来保证一致性和容错性。<br>3.分布式锁和小文件存储服务。</p>
 </blockquote>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;###chubby&lt;/p&gt;
+      &lt;p&gt;&lt;strong&gt;chubby&lt;/strong&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;em&gt;Chubby系统架构&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;大致如下图所示：&lt;br&gt;&lt;img src=&quot;/2016/12/10/chubby/chubby架构.jpg&quot; title=&quot;chubby架构&quot;&gt;&lt;br&gt;一个由c
+&lt;p&gt;大致如下图所示：&lt;br&gt;一个由chubby cell组成的chubby server集群,客户端的chubby lib通过Rpc协议
     
     </summary>
     
