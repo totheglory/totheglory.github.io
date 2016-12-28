@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-12-25T07:32:34.000Z</updated>
+  <updated>2016-12-28T16:22:33.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>zookeeper简介</title>
+    <link href="http://yoursite.com/2016/12/25/zookeeper/"/>
+    <id>http://yoursite.com/2016/12/25/zookeeper/</id>
+    <published>2016-12-25T07:34:57.000Z</published>
+    <updated>2016-12-28T16:22:33.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><strong>zookeeper简介</strong><br>zookeeper为分布式应用提供了高效可靠的基础服务，它并没有直接实用paxos算法作为分布式一致性上的解决方法，而是采用了ZAB协议(ZooKeeper Atomic Broadcast)。<br>它提供了如下特性：<br>1.顺序一致性，即从同一个客户端发起的事务请求，最终将会严格地按照其发送顺序被应用到ZooKeeper中。<br>2.原子性，所有事务请求最终处理的结果在整个集群是一致的，不存在一部分执行了该事务，一部分没有的情况。<br>3.单一视图，无论客户端连接的是哪台zookeeper服务器，其看到的服务端数据模型都是一致的。<br>4.可靠性，一旦服务端成功应用了一条事务，并完成对客户端的响应，那么该事务所引起的服务端状态的变更会一直保持下去，直到一个新的事务对其做了改变。<br>5.实时性，zookeeper能够保证在一定的时间段内，客户端最终一定能从服务端读到最新状态的数据。</p>
+<p>zookeeper的设计目标:<br>1.简单数据模型: zookeeper的树型命名空间由一系列ZNode结点组成，有点类似于文件系统的层级结构。<br>2.方便构建集群: 3-5台机器即可组成一个集群。每台机器都会在内存中维护当前的服务器状态，且每台服务器之间保持互相通信。<br>3.支持顺序访问。<br>4.高性能。全部数据存储在内存中，尤其适用于读操作的场景。</p>
+<p>zookeeper集群<br>它并非传统的master/slave式的集群模式，而是采用了leader，follower和observer三种角色。<br>zookeeper中包含一台选举出来的leader，它提供客户端的读写服务。<br>其他机器为Follower和observer，他们只提供读服务。且二者之间的区别在于，follower除了提供读服务外，还参与leader的选举，以及写操作的”过半写成功”策略。</p>
+<p>session会话<br>客户端于服务器建立第一次连接开始，客户端的会话生命周期也同事开始。通过这个长连接，客户端可以通过心跳机制来于服务端保持会话的有效性。如果客户端因为服务器压力过大，或网络故障等等造成的断开，只要在sessionTimeOut之前重新于集群建立连接，都认为会话仍有效。</p>
+<p>数据节点ZNode<br>即为数据模型中的数据单元,zookeeper的所有数据都存储在一个树型结构的内存模型中。比如/path/foo1就是一个znode，每个znode不仅存储数据，也存储一系列属性信息。ZNode有永久结点和临时结点的区分。临时结点与客户端会话相关。<br>znode的版本，zookeeper会为每个znode维护一个stat，包含version znode的当前版本,cversion znode的子节点版本和aversion znode的ACL版本</p>
+<p>watcher监听器<br>zookeeper允许用户在指定节点注册时间监听器。zookeeper会在事件触发后发送给感兴趣的用户。</p>
+<p>ACL权限控制<br>1.CREATE 创建子节点的权限。<br>2.READ 获取节点数据和子节点列表的权限。<br>3.WRITE 更新节点数据的权限<br>4.DELETE 删除子节点的权限<br>5.ADMIN 设置节点ACL的权限</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;strong&gt;zookeeper简介&lt;/strong&gt;&lt;br&gt;zookeeper为分布式应用提供了高效可靠的基础服务，它并没有直接实用paxos算法作为分布式一致性上的解决方法，而是采用了ZAB协议(ZooKeeper Atomic Broadcast)。&lt;br&gt;它提供了
+    
+    </summary>
+    
+    
+      <category term="分布式一致性,zookeeper,ZAB" scheme="http://yoursite.com/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7-zookeeper-ZAB/"/>
+    
+  </entry>
   
   <entry>
     <title>paxos在chubby的应用</title>
