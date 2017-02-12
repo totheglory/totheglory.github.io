@@ -1,4 +1,330 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> paxos 算法 · terrence mu's blog</title><meta name="description" content="paxos 算法 - terrence mu"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="short icon" href="/gewala.jpg"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="terrence mu's blog"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/gewala.jpg"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="http://weibo.com/muhua1983" target="_blank" class="nav-list-link">WEIBO</a></li><li class="nav-list-item"><a href="https://github.com/totheglory" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li></ul></header><section class="container"><div class="post"><article class="post-block"><h1 class="post-title">paxos 算法</h1><div class="post-info">Oct 17, 2016</div><div class="post-content"><p><strong>分布式一致性的背景</strong><br>1.面临的问题<br>通讯异常，网络分区，三态（成功，失败，超时），节点故障<br>2.相关的概念<br>(1) ACID<br>原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）<br>(2) CAP原理<br>指的是 一致性(CONSISTENCY)可用性(AVAILABILITY)分区容忍性(PARTITION TOLERANCE)这三个要素最多只能同时实现两点，不可能三者兼顾。在进行分布式架构设计时，必须做出取舍。而对于分布式数据系统，分区容忍性是基本要求，否则就失去了价值。<br>一般情况下分布式数据系统，就是在一致性和可用性之间取一个平衡。<br>对于大多数WEB应用，其实并不需要强一致性，因此牺牲一致性而换取高可用性，是多数分布式产品的方向。<br>(3) BASE理论<br>BASE理论是最终一致性的理论支撑，它的全称是 Basically Available（基本可用），Soft-state（软状态/柔性事务)，Eventually Consistent（最终一致性）。在理论逻辑上它是相反于ACID模型的，它牺牲高一致性，获得可用性和分区容忍性。</p>
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="paxos,分布式," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="terrence mu's blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="分布式一致性的背景1.面临的问题通讯异常，网络分区，三态（成功，失败，超时），节点故障2.相关的概念(1) ACID原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）(2) CAP原理指的是 一致性(CONSISTENCY)可用性(AVAILABILITY)分区容忍性(PARTITION TOLERANCE)这三个要素最多只">
+<meta property="og:type" content="article">
+<meta property="og:title" content="paxos 算法">
+<meta property="og:url" content="http://yoursite.com/2016/10/17/paxos/index.html">
+<meta property="og:site_name" content="terrence mu's blog">
+<meta property="og:description" content="分布式一致性的背景1.面临的问题通讯异常，网络分区，三态（成功，失败，超时），节点故障2.相关的概念(1) ACID原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）(2) CAP原理指的是 一致性(CONSISTENCY)可用性(AVAILABILITY)分区容忍性(PARTITION TOLERANCE)这三个要素最多只">
+<meta property="og:updated_time" content="2016-12-24T10:06:09.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="paxos 算法">
+<meta name="twitter:description" content="分布式一致性的背景1.面临的问题通讯异常，网络分区，三态（成功，失败，超时），节点故障2.相关的概念(1) ACID原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）(2) CAP原理指的是 一致性(CONSISTENCY)可用性(AVAILABILITY)分区容忍性(PARTITION TOLERANCE)这三个要素最多只">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/10/17/paxos/"/>
+
+
+
+
+
+  <title> paxos 算法 | terrence mu's blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">terrence mu's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+    
+      <p class="site-subtitle"></p>
+    
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/17/paxos/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="terrence mu">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.gif">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="terrence mu's blog">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="terrence mu's blog" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                paxos 算法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-17T01:15:01+08:00">
+                2016-10-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>分布式一致性的背景</strong><br>1.面临的问题<br>通讯异常，网络分区，三态（成功，失败，超时），节点故障<br>2.相关的概念<br>(1) ACID<br>原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）<br>(2) CAP原理<br>指的是 一致性(CONSISTENCY)可用性(AVAILABILITY)分区容忍性(PARTITION TOLERANCE)这三个要素最多只能同时实现两点，不可能三者兼顾。在进行分布式架构设计时，必须做出取舍。而对于分布式数据系统，分区容忍性是基本要求，否则就失去了价值。<br>一般情况下分布式数据系统，就是在一致性和可用性之间取一个平衡。<br>对于大多数WEB应用，其实并不需要强一致性，因此牺牲一致性而换取高可用性，是多数分布式产品的方向。<br>(3) BASE理论<br>BASE理论是最终一致性的理论支撑，它的全称是 Basically Available（基本可用），Soft-state（软状态/柔性事务)，Eventually Consistent（最终一致性）。在理论逻辑上它是相反于ACID模型的，它牺牲高一致性，获得可用性和分区容忍性。</p>
 <p>一致性模型的类型：<br>(1) Weak 弱一致性：当你写入一个新值后，读操作在数据副本上可能读出来，也可能读不出来。比如：网络游戏其它玩家的数据，VOIP系统等。<br>(2) Eventually 最终一致性：当你写入一个新值后，有可能读不出来，但在某个时间窗口之后保证最终能读出来。比如：DNS，电子邮件、Amazon S3，Google搜索引擎等。<br>(3) Strong 强一致性：新的数据一旦写入，在任意副本任意时刻都能读到新值。比如：文件系统，RDBMS，Azure Table等。</p>
 <p>分布式算法<br>1.PC二段提交<br>第一阶段：<br>协调者向所有参与者发送”是否可以提交”–&gt; 参与者开始做执行准备:资源上锁,预留资源，写入undo/redo日志(便于回滚),准备成功则回应”可以提交”，否则回应”拒绝”<br>第二阶段：<br>所有参与者回应“可以提交” –&gt; 协调者向所有的参与者发送“正式提交”命令 –&gt; 参与者完成正式提交,释放资源，回应”完成”  –&gt; 协调者收集到所有”提交完成”，结束事务。<br>任意一个参与者回应”拒绝提交” –&gt; 协调者向所有的参与者发送“回滚”命令 –&gt; 参与者释放所有资源，回应”回滚完成”–&gt; 协调者收集到所有”回滚完成”，取消整个事务。</p>
 <p>优势:原理实现简单<br>劣势:<br>单点问题–&gt;协调者<br>同步阻塞问题<br>脑裂问题–&gt;协调者区域网络断开，导致双主。<br>过于保守–&gt;所有参与者都要响应(如:参与者超时返回,参与者响应后协调者错误导致参与者所处的状态等)。</p>
@@ -11,4 +337,307 @@
 <p>拜占庭将军问题 (Byzantine Generals Problem)</p>
 <p>拜占庭将军问题的大致描述如下:<br>两支军队，各有一个将军，他们准备协同攻击同样的一座城市，唯一的通信方式就是派各自的信使来往于山谷。但存在会被抓获的危险。<br>当且仅当两支军队同时进攻这座城市才会成功。<br>这种情形下两支军队需要进行沟通，来确定一个进攻时间。<br>这将导致一个问题：<br>试图通过建立在一个不可靠的连接上的交流，来协同一项行动的隐患和设计上的巨大挑战。</p>
 <p><strong>Paxos算法</strong></p>
-<p>Paxos算法是基于消息传递,具有高度容错特性的一致性算法，是当前解决分布式一致性问题最有效的算法之一。<br>该算法解决的问题就是如何在一个可能发生诸如机器宕机或网络异常等情况的分布式系统中，快速且正确的在集群内部对某个数据的值达成一致，并且保证不论发生以上任何异常都不会破坏整个系统的一致性。<br><br>paxos的三个角色Proposer,Acceptor,learner.<br><br>paxos算法大致分为两部分，提出提案和提案获取.<br><br>1.提出提案: 分为prepare阶段和accept阶段<br>prepare阶段<br>Proposer选定出一个编号为N的提案,然后向acceptor的某个超过半数的子集成员发送编号为N的prepare请求。此时如果acceptor收到该编号为N的prepare请求,如果编号N大于它所有当前已经响应的请求编号，那么它就会将编号为N的提案作为响应反馈给Proposer，并且承诺不会再批准任何小于编号N的提案。<br>accept阶段<br>如果Proposer收到来自半数以上的Acceptor反馈的，编号N的Prepare请求响应，那么它就会发送一个针对N的值为Vn的Accept请求给Acceptor，这个Vn就是提案编号N的value值。如果acceptor收到这个针对N编号值为Vn的提案，且它尚未对大于编号N的Prepare请求作出响应，它就可以通过该提案。<br><br>注意：为保证防止死循环,proposer选取一个主proposer。<br><br>2.提案的获取：<br>acceptor通过后通知learner集合，learner集合再负责通知其余的learner。</p></div></article></div></section><footer><div class="paginator"><a href="/2016/10/22/chubby/" class="prev">上一篇</a></div><div class="copyright"><p>© 2015 - 2016 <a href="http://yoursite.com">terrence mu</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>
+<p>Paxos算法是基于消息传递,具有高度容错特性的一致性算法，是当前解决分布式一致性问题最有效的算法之一。<br>该算法解决的问题就是如何在一个可能发生诸如机器宕机或网络异常等情况的分布式系统中，快速且正确的在集群内部对某个数据的值达成一致，并且保证不论发生以上任何异常都不会破坏整个系统的一致性。<br><br>paxos的三个角色Proposer,Acceptor,learner.<br><br>paxos算法大致分为两部分，提出提案和提案获取.<br><br>1.提出提案: 分为prepare阶段和accept阶段<br>prepare阶段<br>Proposer选定出一个编号为N的提案,然后向acceptor的某个超过半数的子集成员发送编号为N的prepare请求。此时如果acceptor收到该编号为N的prepare请求,如果编号N大于它所有当前已经响应的请求编号，那么它就会将编号为N的提案作为响应反馈给Proposer，并且承诺不会再批准任何小于编号N的提案。<br>accept阶段<br>如果Proposer收到来自半数以上的Acceptor反馈的，编号N的Prepare请求响应，那么它就会发送一个针对N的值为Vn的Accept请求给Acceptor，这个Vn就是提案编号N的value值。如果acceptor收到这个针对N编号值为Vn的提案，且它尚未对大于编号N的Prepare请求作出响应，它就可以通过该提案。<br><br>注意：为保证防止死循环,proposer选取一个主proposer。<br><br>2.提案的获取：<br>acceptor通过后通知learner集合，learner集合再负责通知其余的learner。</p>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/paxos-分布式/" rel="tag"># paxos,分布式</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/22/chubby/" rel="prev" title="chubby介绍">
+                chubby介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="terrence mu" />
+          <p class="site-author-name" itemprop="name">terrence mu</p>
+          <p class="site-description motion-element" itemprop="description">keep moving</p>
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">terrence mu</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

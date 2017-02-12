@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-12-28T16:22:33.000Z</updated>
+  <updated>2017-02-10T03:55:19.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -16,11 +16,50 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>JAVA IO -- File</title>
+    <link href="http://yoursite.com/2017/02/10/file/"/>
+    <id>http://yoursite.com/2017/02/10/file/</id>
+    <published>2017-02-10T03:54:15.000Z</published>
+    <updated>2017-02-10T03:55:19.000Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+      <category term="JAVA IO, JDK , File" scheme="http://yoursite.com/tags/JAVA-IO-JDK-File/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>zab 协议</title>
+    <link href="http://yoursite.com/2016/12/29/zab/"/>
+    <id>http://yoursite.com/2016/12/29/zab/</id>
+    <published>2016-12-29T01:27:47.000Z</published>
+    <updated>2017-02-03T10:03:33.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><strong>Zab 协议</strong><br>ZAB协议是专门为ZooKeeper设计的崩溃可恢复的原子消息广播算法。ZooKeeper的分布式一致性主要由ZAB协议来实现。它通过一个单一的主进程来接收并处理客户端的所有事务请求，并采用ZAB的原子广播协议，将服务器的状态变更以事务Proposal的形式广播到所有的副本进程上去。<br>协议的核心是所有事务请求必须由一个全局唯一的服务器来协调处理，即leader，而余下的其他服务器则为follower。leader服务器负责将一个客户端事务请求转换为一个事务Proposal提议，并将该Proposal分发给集群中所有的Follower服务器。如果Leader接收到了超过半数的Follower服务器进行了正确的反馈，leader就会再次向Follower发送Commit消息，要求其将前一个Proposal提交。</p>
+<p>ZAB协议包含两个重要部分:崩溃恢复和消息广播。</p>
+<p>一个由3台机器组成的ZAB服务，通常由一个leader，2个follower服务器组成。某个时间加入一个Follower服务器挂了,整个ZAB集群是不会中断服务的，因为leader服务器仍然可以获得过半的机器包括自身的支持。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;strong&gt;Zab 协议&lt;/strong&gt;&lt;br&gt;ZAB协议是专门为ZooKeeper设计的崩溃可恢复的原子消息广播算法。ZooKeeper的分布式一致性主要由ZAB协议来实现。它通过一个单一的主进程来接收并处理客户端的所有事务请求，并采用ZAB的原子广播协议，将服务器
+    
+    </summary>
+    
+    
+      <category term="zab, ZooKeeper" scheme="http://yoursite.com/tags/zab-ZooKeeper/"/>
+    
+  </entry>
+  
+  <entry>
     <title>zookeeper简介</title>
     <link href="http://yoursite.com/2016/12/25/zookeeper/"/>
     <id>http://yoursite.com/2016/12/25/zookeeper/</id>
     <published>2016-12-25T07:34:57.000Z</published>
-    <updated>2016-12-28T16:22:33.000Z</updated>
+    <updated>2016-12-29T11:07:45.000Z</updated>
     
     <content type="html"><![CDATA[<p><strong>zookeeper简介</strong><br>zookeeper为分布式应用提供了高效可靠的基础服务，它并没有直接实用paxos算法作为分布式一致性上的解决方法，而是采用了ZAB协议(ZooKeeper Atomic Broadcast)。<br>它提供了如下特性：<br>1.顺序一致性，即从同一个客户端发起的事务请求，最终将会严格地按照其发送顺序被应用到ZooKeeper中。<br>2.原子性，所有事务请求最终处理的结果在整个集群是一致的，不存在一部分执行了该事务，一部分没有的情况。<br>3.单一视图，无论客户端连接的是哪台zookeeper服务器，其看到的服务端数据模型都是一致的。<br>4.可靠性，一旦服务端成功应用了一条事务，并完成对客户端的响应，那么该事务所引起的服务端状态的变更会一直保持下去，直到一个新的事务对其做了改变。<br>5.实时性，zookeeper能够保证在一定的时间段内，客户端最终一定能从服务端读到最新状态的数据。</p>
 <p>zookeeper的设计目标:<br>1.简单数据模型: zookeeper的树型命名空间由一系列ZNode结点组成，有点类似于文件系统的层级结构。<br>2.方便构建集群: 3-5台机器即可组成一个集群。每台机器都会在内存中维护当前的服务器状态，且每台服务器之间保持互相通信。<br>3.支持顺序访问。<br>4.高性能。全部数据存储在内存中，尤其适用于读操作的场景。</p>
