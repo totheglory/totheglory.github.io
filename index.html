@@ -832,7 +832,7 @@
             <p><strong>chubby</strong></p>
 <hr>
 <p><strong>chubby系统架构</strong></p>
-<p>大致如下图所示：<br><img src="/2016/12/10/chubby/chubby架构.jpg" title="chubby"><br> 一个由chubby cell组成的chubby server集群,客户端的chubby lib通过Rpc协议与服务端进行通讯，chubby cell之间通过paxos算法选举server中的master。</p>
+<p>大致如下图所示：<br><img src="/source/_posts/chubby/chbbyserver.png" alt="image"><br> 一个由chubby cell组成的chubby server集群,客户端的chubby lib通过Rpc协议与服务端进行通讯，chubby cell之间通过paxos算法选举server中的master。</p>
 <p>目录与文件<br>chubby的数据结构可以看作是一个由文件和目录组成的树。/chubby节点的公共前缀/chubby集群的名字/业务的相对路径, Chubby服务器内部可以解析并定位到数据节点。</p>
 <p>chubby 包括acl元信息，及四个单调递增的64位编码。<br>实例编码，文件内容编码，锁编码，ACL编码<br>消息乱序或延迟造成锁失效。如一个客户端c1获取到了互斥锁L，并且在锁L的保护下发出的请求R，但请求R迟迟没有到达服务器，这时应用程序会认为该客户端进程已经失败，于是便会为另一个客户端C2分配了锁L，然后再重新发送请求R，并且成功的应用到了服务器上，此时，不幸的事情发生了，客户端C1的请求R在经过一波三折之后也到达了服务端，</p>
 <p>chubby中任意一个数据节点都可以充当一个读写锁来使用，一种是单个客户端以排他(写)模式持有这个锁，另一种则是任意数目的客户端以共享(读)模式持有这个锁。<br>chubby舍弃了严格的强制锁，客户端可以在没有获取任何锁的情况下访问chubby的文件。</p>
