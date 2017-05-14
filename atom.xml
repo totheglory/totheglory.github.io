@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-04-10T15:46:46.000Z</updated>
+  <updated>2017-05-14T04:27:49.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,165 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Java Memory Model</title>
+    <link href="http://yoursite.com/2017/05/13/jmm/"/>
+    <id>http://yoursite.com/2017/05/13/jmm/</id>
+    <published>2017-05-13T03:57:31.000Z</published>
+    <updated>2017-05-14T04:27:49.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>##Java Memory Model<br>线程之间的通信机制有两种：共享内存和消息传递。</p>
+<blockquote>
+<ul>
+<li>线程之间的公共状态，在共享内存的并发模型里，是通过写-读内存中的公共状态来隐式进行通信。在消息传递的并发模型里，是通过明确的发送消息来显式进行通信。</li>
+<li>线程之间的状态同步，在共享内存并发模型里，必须显式地指定某个方法或某段代码需要在线程之间互斥执行。在消息传递的并发模型里，由于消息的发送必须在消息的接收之前，因此同步是隐式的。</li>
+</ul>
+</blockquote>
+<p>Java并发采用的是共享内存模型，线程之间的内存公共状态的读写通信是透明的，状态同步是显式的，保证同步操作时线程之间是互斥的。</p>
+<p>JVM内存模型中,程序计数器，虚拟机栈，本地方法栈都是线程私有的，他们存储的信息不存在可见性问题，是线程安全的。堆和方法区是线程共享的,存在可见性问题。</p>
+<p>线程之间的通信是由JMM决定的，它决定了一个线程对共享变量的写入何时对另一个线程可见。相当于每个线程都有一个主内存中的变量副本，用于自身的操作。</p>
+<p>JMM规范中有两条规定：</p>
+<blockquote>
+<ul>
+<li>线程对共享变量的所有操作都必须在自己的工作内存中进行，不能直接从主内存中读写。</li>
+<li>不同线程之间无法直接访问其他线程工作内存中的变量，线程间变量值的传递需要通过主内存来完成。</li>
+</ul>
+</blockquote>
+<p><strong><em>happen-before原则</em></strong><br>一个线程中的每个操作，happens-before 于该线程中的任意后续操作。<br>一个监视器解锁，happens-before 于随后对这个监视器锁的加锁。<br>一个volatile域的写，happens-before 于任意后续对这个volatile域的读。<br>如果A happens-before B，且B happens-before C，那么A happens-before C。</p>
+<p>两个操作之间具有happens-before关系，并不意味着前一个操作必须要在后一个操作之前执行。happens-before仅仅要求前一个操作（执行的结果）对后一个操作可见，且前一个操作按顺序排在第二个操作之前。</p>
+<p><strong><em>指令重排序</em></strong><br>happen-before规则是编译器重排序和处理器重排序的基础。<br>程序执行时，编译器和处理器会根据执行效率对程序进行指令重排序。<br>编译器重排序，编译器在不改变单线程程序语义的前提下，可以重新安排语句的执行顺序。(编译器级别)<br>指令级重排序，现代处理器采用了指令级并行技术（Instruction-Level Parallelism， ILP）来将多条指令重叠执行。如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序。(cpu级别)<br>内存系统重排序。由于处理器使用缓存和读/写缓冲区，这使得加载和存储操作看上去可能是在乱序执行。(CPU级别)</p>
+<p>编译器重排序由JMM的编译器重排序规则来禁止，处理器重排序可以通过内存屏障来禁止重排序。每个处理器processor的写缓冲区仅对自身可见。常见的处理器都允许store-load的重排序。</p>
+<p>JMM的内存屏障分为以下四类:<br>JMM内存屏障分为四类</p>
+<blockquote>
+<ul>
+<li>LoadLoadBarries<br>如：Load1–&gt;LoadLoad–&gt;Load2  确保load1数据装载一定在load2及所有后续装载指令1前装载。</li>
+<li>StoreStoreBarries<br>如：Store1–&gt;StroreStore–&gt;Store2  确保Store1数据对其他处理器可见一定在Store2及所有后续存储指令存储的前面。</li>
+<li>LoadStoreBarries<br>如：Load1–&gt;LoadStore–&gt;Store2</li>
+<li>StoreLoadBarries<br>如: Store1–&gt;StoreLoad–&gt;Load2</li>
+</ul>
+</blockquote>
+<p><strong><em>as-if-serial语义</em></strong><br>编译器和处理器不会改变存在数据依赖关系(仅针对单个处理器中执行的指令序列和单个线程中执行的操作，不包括不同处理器之间和不同线程之间的)的两个操作的执行顺序。因此重排序并不会给单线程带来内存可见性问题。这个就是as-if-serial语义。</p>
+<p>as-if-serial:无论如何重排序，程序执行的结果应该与代码顺序执行的结果一致(Java编译器,运行时和处理器都会保证java在单线程下遵循as-if-serial语义)。</p>
+<p><strong><em>原子性</em></strong><br>JMM对正确同步的多线程程序的内存一致性做了如下保证：<br>如果程序是正确同步的，程序的执行将具有顺序一致性（sequentially consistent）<br>即程序的执行结果与该程序在顺序一致性内存模型中的执行结果相同.</p>
+<p>对64位(long,double)变量的读写可能不是原子操作，java内存模型允许JVM将没有被volatile修饰的64位数据类型的读写操作划分为两次32位的读写操作来完成。一般商用的JVM都对这部分做了原子性操作的保证，不用特意处理。<br>导致问题：可能会出现读取到”半个变量”的情况<br>解决办法：加volatile关键字。</p>
+<p><strong><em>加volatile关键字</em></strong><br>volatile能够保证volatile变量的可见性，不能保证volatile变量复合操作的原子性<br>volatile如何实现内存可见性，深入来说通过加入内存屏障和禁止重排序优化来实现的。</p>
+<p>对volatie变量执行写操作时，会在写操作后加入一条store屏障指令。</p>
+<blockquote>
+<ul>
+<li>会把CPU写缓冲区的缓存强制刷新到主内存中。</li>
+<li>防止处理器把volatile变量前面的操作重排序到valatile写操作之后。</li>
+</ul>
+</blockquote>
+<p>对volatie变量执行读操作时，会在读操作前加入一条load屏障指令。</p>
+<blockquote>
+<ul>
+<li>CPU缓冲区失效，从主内存读。</li>
+<li>防止重排序。</li>
+</ul>
+</blockquote>
+<p>volatile禁止重排序的规则</p>
+<blockquote>
+<ul>
+<li>当第二个操作是volatile写时，不管第一个操作是什么，都不能重排序。这个规则确保volatile写之前的操作不会被编译器重排序到volatile写之后。</li>
+<li>当第一个操作是volatile读时，不管第二个操作是什么，都不能重排序。这个规则确保volatile读之后的操作不会被编译器重排序到volatile读之前。</li>
+<li>当第一个操作是volatile写，第二个操作是volatile读时，不能重排序。</li>
+</ul>
+</blockquote>
+<p>volatile内存屏障的规则</p>
+<blockquote>
+<ul>
+<li>在每个volatile写操作的前面插入一个StoreStore屏障。</li>
+<li>在每个volatile写操作的后面插入一个StoreLoad屏障。</li>
+<li>在每个volatile读操作的后面插入一个LoadLoad屏障。</li>
+<li>在每个volatile读操作的后面插入一个LoadStore屏障。</li>
+</ul>
+</blockquote>
+<p><strong><em>锁和CAS</em></strong><br>锁除了让临界区互斥执行外，还可以让释放锁的线程向获取同一个锁的线程发送消息。<br>JVM中concurrent包中的锁主要依赖的是AbstractQueuedSynchronizer框架，即AQS实现的。AQS会维护一个volatile的Long型同步状态。</p>
+<p>java的CAS同时具有 volatile 读和volatile写的内存语义，即编译器不能对CAS与CAS前面和后面的任意内存操作重排序。CAS会使用现代处理器上提供的高效机器级别原子指令，这些原子指令以原子方式对内存执行读-改-写操作，这是在多处理器中实现同步的关键。volatile变量的读/写和CAS可以实现线程之间的通信，如下</p>
+<blockquote>
+<ul>
+<li>A线程写volatile变量，随后B线程读这个volatile变量。</li>
+<li>A线程写volatile变量，随后B线程用CAS更新这个volatile变量。</li>
+<li>A线程用CAS更新一个volatile变量，随后B线程用CAS更新这个volatile变量。</li>
+<li>A线程用CAS更新一个volatile变量，随后B线程读这个volatile变量。</li>
+</ul>
+</blockquote>
+<p>conocurrent包的通用实现模式</p>
+<blockquote>
+<ul>
+<li>声明共享状态为volatile</li>
+<li>使用CAS的原子条件更新来实现线程之间的同步</li>
+<li>配合以volatile和CAS所具有的volatile读/写的内存语义,来实现线程之间的通信。</li>
+</ul>
+</blockquote>
+<p><strong><em>final</em></strong><br>对于final域，只要对象是正确构造的（被构造对象的引用在构造函数中没有“逸出”），那么不需要使用同步（指lock和volatile的使用），就可以保证任意线程都能看到这个final域在构造函数中被初始化之后的值。<br>JSR133对写final域的重排序规则会要求译编器在final域的写之后，构造函数return之前，插入一个StoreStore障屏。读final域的重排序规则要求编译器在读final域的操作前面插入一个LoadLoad屏障。</p>
+<p>JMM在不同的处理器中需要插入的内存屏障的数量和种类也不相同。</p>
+<blockquote>
+<ul>
+<li>对于不计写读操作的处理器，JMM需要插入的内存屏障为StoreLoad Barries</li>
+<li>对于不计写读操作和写写操作的处理器, JMM需要插入的内存屏障为StoreLoad Barries,StoreStore Barries.</li>
+<li>对于不计写读，写写，读写和读读操作的处理器，JMM需要插入的内存屏障为StoreLoad Barries,StoreStore Barries,LoadStore Barries,LoadLoad Barries.</li>
+</ul>
+</blockquote>
+<p>JSR-133对JDK5之前的旧内存模型的修补主要有两方面：</p>
+<blockquote>
+<ul>
+<li>增强volatile的内存语义。旧内存模型允许volatile变量与普通变量重排序。JSR-133严格限制volatile变量与普通变量的重排序，使volatile的写-读和锁的释放-获取具有相同的内存语义。</li>
+<li>增强final的内存语义。在旧内存模型中，多次读取同一个final变量的值可能会不相同。JSR-133为final增加了两个重排序规则。保证了final初始化的安全性。即如果一个对象的引用在构造阶段不允许逸出（escape），那么一旦构造函数完成，并且线程发布了对另一个对象的引用，那么在不使用同步的条件下，这个对象的final域字段就能保证对所有其他线程是可见的、正确的并且是不变的。</li>
+</ul>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;##Java Memory Model&lt;br&gt;线程之间的通信机制有两种：共享内存和消息传递。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;线程之间的公共状态，在共享内存的并发模型里，是通过写-读内存中的公共状态来隐式进行通信。在消息传递的并发模型里，是通过明确的发送
+    
+    </summary>
+    
+    
+      <category term="JMM" scheme="http://yoursite.com/tags/JMM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>javaio</title>
+    <link href="http://yoursite.com/2017/04/11/javaio/"/>
+    <id>http://yoursite.com/2017/04/11/javaio/</id>
+    <published>2017-04-11T15:03:54.000Z</published>
+    <updated>2017-04-11T15:03:54.000Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Java Class文件</title>
+    <link href="http://yoursite.com/2017/04/10/javaclass/"/>
+    <id>http://yoursite.com/2017/04/10/javaclass/</id>
+    <published>2017-04-10T15:50:29.000Z</published>
+    <updated>2017-04-10T16:00:30.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><strong>Java Class文件</strong><br>Java Class文件是Java支持跨平台的基础，它是由不同位数的字节组成的，也称为字节码文件。<br>其组织结构如下</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;strong&gt;Java Class文件&lt;/strong&gt;&lt;br&gt;Java Class文件是Java支持跨平台的基础，它是由不同位数的字节组成的，也称为字节码文件。&lt;br&gt;其组织结构如下&lt;/p&gt;
+
+    
+    </summary>
+    
+    
+      <category term="JDK,Class文件" scheme="http://yoursite.com/tags/JDK-Class%E6%96%87%E4%BB%B6/"/>
+    
+  </entry>
   
   <entry>
     <title>Java类编译，加载，执行</title>
