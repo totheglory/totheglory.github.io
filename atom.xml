@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-05-14T04:27:49.000Z</updated>
+  <updated>2017-08-30T09:12:46.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,67 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>正则表达式Tips</title>
+    <link href="http://yoursite.com/2017/08/23/regextips/"/>
+    <id>http://yoursite.com/2017/08/23/regextips/</id>
+    <published>2017-08-23T01:09:07.000Z</published>
+    <updated>2017-08-30T09:12:46.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="正则表达式引擎"><a href="#正则表达式引擎" class="headerlink" title="正则表达式引擎"></a>正则表达式引擎</h3><p>正则表达式的正则引擎主要分为两大类：DFA和NFA，NFA又细分为传统型NFA，POSIX NFA。</p>
+<h4 id="DFA（确定型有穷机）"><a href="#DFA（确定型有穷机）" class="headerlink" title="DFA（确定型有穷机）"></a>DFA（确定型有穷机）</h4><ul>
+<li>以文本主导的匹配。匹配规则是从匹配文本入手，从左至右，每个字符的匹配次数不会超过两次。</li>
+<li>多条子表达式会在扫描文本时，同时进行匹配</li>
+<li>不支持捕获组，各种引用，贪心修饰符等。</li>
+<li>时间复杂度是多项式级别的。</li>
+<li>可以确保匹配最长的可能的字符串。</li>
+<li>使用DFA引擎 awk，MySQL，egrep等</li>
+</ul>
+<h4 id="NFA-（非确定性有穷自动机）"><a href="#NFA-（非确定性有穷自动机）" class="headerlink" title="NFA （非确定性有穷自动机）"></a>NFA （非确定性有穷自动机）</h4><ul>
+<li>以正则表达式主导的匹配。</li>
+<li>时间复杂度最好是多项式级别的，最差是指数级别的。</li>
+<li>支持捕获组和各种引用等。</li>
+<li>采用贪婪匹配回溯的方式匹配。</li>
+<li>如果是POSIX NFA，则会在可以确保已经找到可能的最长的匹配之前，将继续回溯。因而POSIX NFA的效率低于传统的NFA效率。</li>
+<li>使用传统型NFA的引擎 GUN Emacs，Java，.NET，Ruby，Perl，PHP，Python，Sed，vi等。</li>
+<li>使用POSIX NFA的引擎 </li>
+<li>使用DFA/NFA混合的引擎 GNU awk,GNU grep/egrep等。</li>
+</ul>
+<p>注意DFA会在编译阶段对表达式进行分析，生成映射关系，因而编译阶段NFA效率高于DFA。</p>
+<h4 id="匹配过程"><a href="#匹配过程" class="headerlink" title="匹配过程"></a>匹配过程</h4><p>如Hello terrence，正则表达式为 /te(brence|rrence|rrencm)/ </p>
+<ul>
+<li>NFA 匹配</li>
+</ul>
+<blockquote>
+<p>先在字符串中查找t然后匹配其后是否为e ，如果是e则继续，查找其后是否为b，如果不是则匹配其后是否为 r (此时淘汰brence选择项)。然后继续看其后是否依次为r，e，n，c，接着测试是否为 e，是e则匹配成功，不是则测试是否为m。</p>
+</blockquote>
+<ul>
+<li>DFA匹配</li>
+</ul>
+<blockquote>
+<p>从 Hello 中 H 开始依次查找 t，定位到 t ，已知其后为 e ，则查看表达式是否有 e ，此处正好有 e 。然后字符串 e 后为 r ，DFA依次测试表达式，此时 brence 不符合要求淘汰。rrence 和 rrencm 符合要求，然后DFA依次检查字符串，检测到rence 中的 e 时只有rence 分支符合。</p>
+</blockquote>
+<h4 id="NFA的匹配效率"><a href="#NFA的匹配效率" class="headerlink" title="NFA的匹配效率"></a>NFA的匹配效率</h4><h4 id="Alternation-Can-Be-Expensive"><a href="#Alternation-Can-Be-Expensive" class="headerlink" title="Alternation Can Be Expensive"></a><em>Alternation Can Be Expensive</em></h4><p>Alternation可能会导致更多的回溯。</p>
+<p>举例如下:<br>具有Alternation的正则：u|v|w|x|y|z<br>固定的正则：[uvwxyz]</p>
+<p>具有Alternation的正则每次匹配失败都需要回朔，固定的正则将一次匹配所有的。<br>如果失败，只匹配一次。即极限情况下，具有Alternation的正则需要回溯的次数是固定正则回溯次数的六倍。</p>
+<h4 id="尽可能的明确-或-标识"><a href="#尽可能的明确-或-标识" class="headerlink" title="尽可能的明确^或$标识"></a><em>尽可能的明确^或$标识</em></h4><p>尽量确定行首或行尾的特征，使用^或者$来标识开始或结束，特别是表达式中包含贪婪匹配的元素时。</p>
+<p>举例:假如用non-capturing group (?:) 匹配 <a href="http://baidu.com" target="_blank" rel="external">http://baidu.com</a><br>正则表达式如下(http?|ftp)://([^/\r\n]+)(/[^\r\n]<em>)?<br>如果我并不关心protocol，可以加入non-capturing group(?:) ，改为(?:http?|ftp)://([^/\r\n]+)(/[^\r\n]</em>)?<br>这样匹配时，会忽略掉protocol，提升效率。</p>
+<h4 id="提取重复内容"><a href="#提取重复内容" class="headerlink" title="提取重复内容"></a><em>提取重复内容</em></h4><p>h(?:as|at) vs. (?:has|hat)</p>
+<p>重复功能可以提取出来，当作一个函数，从而减少回朔的次数。这里前面的正则表达式效率高于后面的。</p>
+<h4 id="将最有可能的匹配放在最前面"><a href="#将最有可能的匹配放在最前面" class="headerlink" title="将最有可能的匹配放在最前面"></a><em>将最有可能的匹配放在最前面</em></h4><p>假如我想匹配各种后缀(com net edu等)结尾的url，正则表达式如下 (?:com|edu|org|net|…)<br>实际上每个后缀的域名数量是不同的，假如 .net .org 的域名很多，为了提高效率我们可以将域名按照数量从高到低排序，以减少回溯次数。原正则表达式则变为 (?:net|org|com|edu|…)。</p>
+<h4 id="用lookAround剔除掉部分无效的匹配"><a href="#用lookAround剔除掉部分无效的匹配" class="headerlink" title="用lookAround剔除掉部分无效的匹配"></a><em>用lookAround剔除掉部分无效的匹配</em></h4>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;正则表达式引擎&quot;&gt;&lt;a href=&quot;#正则表达式引擎&quot; class=&quot;headerlink&quot; title=&quot;正则表达式引擎&quot;&gt;&lt;/a&gt;正则表达式引擎&lt;/h3&gt;&lt;p&gt;正则表达式的正则引擎主要分为两大类：DFA和NFA，NFA又细分为传统型NFA，POSIX NFA。
+    
+    </summary>
+    
+    
+      <category term="regex，DFA，NFA" scheme="http://yoursite.com/tags/regex%EF%BC%8CDFA%EF%BC%8CNFA/"/>
+    
+  </entry>
   
   <entry>
     <title>Java Memory Model</title>
