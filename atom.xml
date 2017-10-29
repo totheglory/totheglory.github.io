@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-08-30T09:12:46.000Z</updated>
+  <updated>2017-10-29T07:05:42.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,352 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>高性能MySQL 学习笔记</title>
+    <link href="http://yoursite.com/2017/10/28/mysqlstudy/"/>
+    <id>http://yoursite.com/2017/10/28/mysqlstudy/</id>
+    <published>2017-10-28T15:59:22.000Z</published>
+    <updated>2017-10-29T07:05:42.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>第一章 Mysql架构和历史</p>
+<p>MySQL的两种基本锁</p>
+<p>表锁和行级锁</p>
+<ul>
+<li><p>表锁<br>读锁互不排斥，写锁互斥。Mysql 服务器层会根据情况添加表锁，如ALTER TABLE操作。</p>
+</li>
+<li><p>行级锁<br>主要在数据库的InnoDB，XtraDB等存储引擎中实现。</p>
+</li>
+</ul>
+<p>ACID</p>
+<ul>
+<li>原子性，一致性，隔离性，持久性。</li>
+</ul>
+<p>四种隔离级别</p>
+<ul>
+<li>READ UNCOMMITTED(未提交读)<br>事务中的修改，即使没提交，对其他事务也是可见的。事务未提交，其他事务也可以读取，即为脏读。</li>
+<li>READ COMMITTED(提交读)<br>绝大多数数据库的默认隔离级别(MySQL不是)。一个事务的修改在未提交之前对其他事务是不可见的。也可以叫做不可重复读，即两次同样的查询，读取到的结果可能不一致。</li>
+<li>REPEATABLE READ(可重复读)<br>可重复读保证了在同一事务中多次读取同样的查询，结果是一致的。它解决了脏读的问题。无法解决幻读的问题。可重复读是MySQL的默认隔离级别。幻读指的是某个事务在读取一定范围内的记录时，另一个事务在该范围内插入了新的记录，当这个事务再次读取时，会产生幻行的问题。InnoDB，XtraDB等引擎，通过多版本并发控制解决了幻读问题。</li>
+<li><p>SERIALIZABLE(串行化)<br>强制事务串行执行，解决了幻读和脏读问题。一般性能太差，不会使用。</p>
+<p>隔离级别                脏读可能性    不可重复读可能性    幻读可能性    加锁读<br>READ UNCOMMITTED     YES       YES        YES      NO<br>READ COMMITTED       NO        YES        YES      NO<br>REPEATABLE READ      NO         NO        YES      NO<br>SERIALIZABLE         NO         NO        NO      YES </p>
+</li>
+</ul>
+<p>死锁</p>
+<ul>
+<li>死锁处理: InnoDB处理死锁的方式是将持有最少行级排他锁的事务回滚。</li>
+</ul>
+<p>MySQL中的事务</p>
+<ul>
+<li>MySQL提供的官方支持事务的引擎有InnoDB和NDB Cluster，第三方的有XtraDB和PBXT。-</li>
+<li>MySQL默认采用AUTOCOMMIT模式，无显示指定的情况下默认每一次查询都是一次事务提交。可以通过命令SHOW VARIABLES LIKE ‘AUTOCOMMIT’来获取当前是否开启。没开启则直到显式的调用COMMIT或者ROLLBACK才表示事务结束。<br>注意：存在一些命令会在执行前导致强制执行COMMIT操作的。如DDL中的ALTER TABLE。请检查官方给出的会导致强制提交的语句。</li>
+<li>MySQL可以通过执行SET TRANSACTION ISOLATION LEVEL来设置隔离级别，可以设置session级别的或者在配置文件中设置整个数据库级别的。<br>mysql&gt;SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;</li>
+</ul>
+<p>MySQL服务器层不管理事务，事务由下层的存储引擎实现，所以同一事务中，使用多种存储引擎是不可靠的。</p>
+<p>特定语句的加锁方式</p>
+<ul>
+<li>SELECT …… LOCK IN SHARE MODE</li>
+<li>SELECT …… FOR UPDATE</li>
+</ul>
+<p>MySQL的多版本并发控制(MVCC)</p>
+<p>典型的MVCC有乐观并发控制和悲观并发控制。</p>
+<p>以InnoDB的MVCC为例，它是通过在每行记录后面保存两个隐藏的列来实现的。两个列分别保存了行的创建时间和过期时间(删除时间)。(注意这里实际存储的是系统版本号，每开始一个新事务，系统版本号都会加1)</p>
+<p>SELECT</p>
+<ol>
+<li>查找&lt;=当前事务版本的数据行，以确保事务读取的行，要么是事务开始前已存在的，要么是当前事务新增或修改过的。</li>
+<li>删除的版本未定义或大于当前事务版本，这样可以确保事务读取到的数据在事务开始之前一定未被删除。</li>
+</ol>
+<p>INSERT</p>
+<ul>
+<li>新增的行保存当前事务的版本号为行版本号。</li>
+</ul>
+<p>DELETE</p>
+<ul>
+<li>删除的行保存当前事务的版本号为行删除标识。</li>
+</ul>
+<p>UPDATE</p>
+<ul>
+<li>新增一条记录保存当前事务的版本号为行版本号，同时将当前系统版本号作为原来行的删除标识。</li>
+</ul>
+<p>MVCC只在REPEATABLE READ和READ COMMITTED两个隔离级别下工作，READ UNCOMMITTED总是会读取最新的数据行，而不是符合当前事务版本的行，而SERIALIZABLE则会对所有读取行都加锁。</p>
+<p>MySQL引擎</p>
+<p>可以通过命令来获取当前版本支持的引擎。</p>
+<p>mysql&gt; show engines</p>
+<p>MySQL存储引擎</p>
+<p>MySQL创建表，会在数据库子目录下创建一个和表同名的.frm文件，用于保存表的定义。可以通过以下命令查看</p>
+<p>mysql&gt;SHOW TABLES STATUS LIKE 表名</p>
+<p>InnoDB引擎概览</p>
+<ul>
+<li>存储在表空间中，4.1后的版本，每个表的数据和索引存放在单独的文件中。</li>
+<li>采用MVCC来支持高并发，支持全部四种隔离级别，默认级别为REPEATABLE READ可重复读，并且通过<br>间隙锁（next key locking）策略防止幻读。</li>
+<li>InnoDB表是基于聚簇索引建立的，聚簇索引主键查询性能很高，但二级索引（即非主键索引中）必须包含主键列，因而主键列应尽可能的小。</li>
+<li>InnoDB可以支持热备份，无需停止读写。</li>
+<li>MySQL5.1以后的默认引擎，支持自动崩溃恢复特性。5.1以前是MyISAM为默认引擎。</li>
+</ul>
+<p>MyISAM引擎概览</p>
+<ul>
+<li>将表存储在两个文件中，数据文件和索引文件，分别以.MYD和.MYI为扩展名。</li>
+<li>支持表级锁，不支持行级锁。读取加共享锁，写入加排他锁。支持并发插入，即在表有读取查询的同时，有插入操作。</li>
+<li>支持修复。通过CHECK TABLE mytable来检查表的错误，如果有错误，可以用REPAIR TABLE mytable来进行修复。如果MySQL服务器已经关闭，可以通过myisamchk来检查和修复操作。</li>
+<li>索引，MyISAM支持前缀索引，和基于分词创建的全文索引。</li>
+<li>支持延迟更新索引键，通过DELAY_KEY_WRITE来设置，只有在清理键缓冲区或者关闭表的时候才会将对应的索引块写入到磁盘。如果数据库宕机，可能会导致索引损坏。</li>
+<li>MyISAM压缩表比较适合数据导入后，不再进行修改操作的表。</li>
+<li>MyISAM最大的性能问题就是表锁问题。</li>
+</ul>
+<p>Archive引擎概览</p>
+<ul>
+<li>Archive存储引擎只支持INSERT和SELECT操作，5.1之前也不支持索引。比较适用于日志和数据采集类的应用。</li>
+<li>支持行级锁和专用缓冲区，支持一致性读及批量插入对读操作的不可见性。但它不是事务型引擎。</li>
+</ul>
+<p>Blackhole引擎概览</p>
+<ul>
+<li>该引擎它并没有实现存储机制，会丢弃所有的插入数据，不做保存，但服务器会记录Blackhole表的日志。可以用于复制数据到备库。</li>
+</ul>
+<p>CSV引擎概览</p>
+<ul>
+<li>CSV引擎可以实现普通CSV文件作为MySQL表来读取和操作，因此可以用于一种数据交换机制。</li>
+</ul>
+<p>Federated引擎概览</p>
+<ul>
+<li>Federated引擎是访问其他MySQL服务器的一个代理，他创建一个到远程MySQL服务器的客户端连接，并将查询传输到远程服务器执行，提取出需要的数据。</li>
+<li>Federated可以在本地数据库中创建一个远端数据表的“软链接”。这样，访问远端数据表就如同访问本地数据表。（远端可以是不同主机上的不同实例）</li>
+<li>手动安装命令<br>mysql&gt; install plugin federated soname ‘ha_federated.so’</li>
+</ul>
+<p>Memory引擎</p>
+<ul>
+<li>数据保存在内存中，无需磁盘的io操作，重启后，表结构还在，数据清空。</li>
+<li>比MyISAM引擎快一个数量级。</li>
+<li>支持的场景多样<br>用于查找或者映射表<br>用于缓存周期性聚合结果<br>用于保存数据分析产生的中间数据。</li>
+<li>支持Hash索引，查询速度非常快。</li>
+<li>表级锁，行固定不支持VARCHAR，不支持BLOB或TEXT。</li>
+</ul>
+<p>Merge引擎</p>
+<ul>
+<li>MyISAM的一个变种</li>
+<li>多个MyISAM表合并而来的虚拟表</li>
+<li>之前用于数据仓库或日志类应用。引入分区功能后，已废弃。</li>
+</ul>
+<p>NDB集群引擎</p>
+<p>MySQL服务器，NDB集群存储引擎，NDB数据库组成MySql集群。</p>
+<p>第三方引擎</p>
+<p>OLTP类引擎</p>
+<p>XtraDB引擎</p>
+<ul>
+<li>基于InnoDB引擎的改进版，包含在Percona Server和Maria DB中</li>
+<li>OLTP类引擎</li>
+<li>在性能，可测量性和灵活性上有所提升</li>
+</ul>
+<p>PBXT引擎</p>
+<ul>
+<li>OLTP类引擎</li>
+<li>支持ACID事务和MVCC</li>
+<li>支持引擎级别的复制，外键约束</li>
+<li>支持固态存储SSD，优化了大值类型，如BLOB。</li>
+</ul>
+<p>TokuDB引擎</p>
+<ul>
+<li>分形树的索引数据结构，与缓存无关，大小超过内存性能也不会下降。</li>
+<li>大数据存储引擎，高压缩比，可创建大量索引。</li>
+</ul>
+<p>RethinkDB</p>
+<ul>
+<li>为固态存储SSD而设计的。</li>
+<li>采用了一种只能追加的写时复制B树作为索引的数据结构</li>
+</ul>
+<p>面向列的存储引擎</p>
+<p>infobright</p>
+<ul>
+<li>为数据分析和数据仓库设计的面向列的存储引擎。</li>
+<li>不支持索引，块结构排序</li>
+</ul>
+<p>社区存储版本</p>
+<p>Aria/Groonga/OQGragh/Q4M/SphinxSE/Spider/VPForMySQL</p>
+<p>小结</p>
+<ul>
+<li>MySQL分层架构，上层是服务器层的服务和查询执行引擎，下层是存储引擎。<br>优先建议用InnoDB引擎，如果用全文索引可以用InnoDB和Sphinx组合，而不用MyISAM。<br>MyISAM比较适合日志类应用。<br>选取MySql引擎的考虑因素，备份/事务/崩溃恢复/特定的特性。<br>日志类应用 MyISAM/Archive引擎比较合适<br>订单类应用 InnoDB</li>
+</ul>
+<p>第三章 服务器性能剖析</p>
+<p>查询响应时间是数据库服务器性能度量的标准。</p>
+<p>性能剖析有两种：</p>
+<ul>
+<li>基于执行时间的分析</li>
+<li>基于等待的分析</li>
+</ul>
+<p>常用的性能剖析命令：</p>
+<ul>
+<li>Show Profile / Show Profiles</li>
+<li>Show Status 某些数据库活动的频繁程度</li>
+<li>Show Global Status</li>
+<li>Show Processlist</li>
+</ul>
+<p>Strace 工具调查系统调用情况。</p>
+<ul>
+<li>strace -cfp $pid of mysqld</li>
+</ul>
+<p>小结</p>
+<ul>
+<li>响应时间是定义性能最有效的方法。</li>
+<li>测量的最佳起点是应用程序，而非数据库。</li>
+<li>完整的测量需要用剖析器来分析大量的待分析数据。</li>
+</ul>
+<p>第四章 schema与数据类型优化</p>
+<p>数据类型的选择</p>
+<ul>
+<li>更小的通常更好，一般情况下，更小的数据类型更快，占用更少的磁盘，cpu和内存，处理时需要的cpu周期也更少。</li>
+<li>简单就好，简单的数据类型会占用更少的cpu周期。如存储时间应该用date，time或datetime而非字符串，存储ip应该用整型。</li>
+<li>尽量避免NULL，NULL值很难优化，会占用更多的存储空间。对于要索引的列，尽量避免为null。</li>
+<li>数据类型的别名不会有性能损耗，但是肯能会令人不解。</li>
+</ul>
+<p>整数类型</p>
+<ul>
+<li>有符号和无符号类型使用相同的存储空间，并具有相同的性能。</li>
+<li>MySQL可以为整数类型指定宽度，大多数情况是没有意义的。只是用来显示字符个数，对于存储和计算而言，INT(1)和INT(20)是相同的。</li>
+</ul>
+<p>实数类型</p>
+<ul>
+<li>带有小数部分的数字。也可以存储DECIMAL，比BIGINT还大的整数。</li>
+<li>MySQL既支持精确类型，也支持不精确类型。</li>
+<li>MySQL使用DOUBLE做内部浮点计算的类型，使用DECIMAL来做存储类型。</li>
+<li>可以通过乘以响应的倍数来用BIGINT代替DECIMAL。</li>
+</ul>
+<p>字符串类型</p>
+<p>VARCHAR</p>
+<ul>
+<li>VARCHAR类型可变长字符，如果MySQL表ROW_FORMAT=FIXED，定长存储。</li>
+<li>VARCHAR适合的场景，字符串列的最大长度比平均长度大很多，列更新很少，碎片少。使用了UTF-8这样的可变长字符集。</li>
+<li>InnoDB会把VARCHAR存储为BLOB。</li>
+</ul>
+<p>CHAR</p>
+<ul>
+<li>CHAR类型定长。</li>
+<li>不易产生碎片。</li>
+</ul>
+<p>最好的策略是只分配真正需要的空间。</p>
+<p>BOLB和TEXT类型</p>
+<ul>
+<li>MySQL对TXET或者BLOB的排序与其他类型不同，它只对每个列的最前max_sort_length字节进行排序。如果只需要排序前面一小部分字符，则可以减少max_sort_length的配置，或者使用ORDER BY SUBSTRING(column,length)。</li>
+<li>MySQL不能将BOLB和TEXT列全部长度的字符来进行索引。</li>
+<li>MySQL在查询时如果使用了BLOB或者TEXT列会使用磁盘临时表，这会导致严重的性能开销。最好的解决方案是尽量避免使用这两种类型。如果不得不用，可以考虑用SUBSTRING(column,length)的方式取足够短的字符,来保证使用的临时表大小，小于max_heap_table_size或tmp_table_size，从而不会由内存临时表转为磁盘临时表。</li>
+<li>如果EXPLAIN执行计划的Extra列包含了Using temporary，则说明这个查询使用了隐式临时表。</li>
+</ul>
+<p>枚举类</p>
+<p>MySQL会把枚举值存储为整数，枚举的字符串列表是固定的，如果添加或删除字符串，需要ALTER TABLE。可以考虑用枚举替代字符串。</p>
+<p>DATETIME和TIMESTAMP</p>
+<p>DATETIME</p>
+<ul>
+<li>范围1001-9999年，精度为秒</li>
+<li>存储格式为YYYYMMDDHHMMSS，与时区无关</li>
+<li>存储占8个字节</li>
+</ul>
+<p>TIMESTAMP</p>
+<ul>
+<li>1970年1月1日午夜-2038年。</li>
+<li>占用4个字节</li>
+<li>默认列为NOT NULL。</li>
+</ul>
+<p>MariaDB支持微秒级别的时间存储。</p>
+<p>位数据类型</p>
+<p>BIT</p>
+<ul>
+<li>5.0版本之前BIT是TINYINT的同义词。</li>
+<li>可以使用BIT列在一列中存储一个或多个true/false值。</li>
+<li>BIT列最大长度是64个位</li>
+<li>BIT在MYSQL中当做字符类型，而非数字类型。一般不建议用BIT</li>
+<li>如果想在BIT中存储一个true或者false，另一个方法是创建一个可以为空的CHAR(0)列。</li>
+</ul>
+<p>SET</p>
+<ul>
+<li>SET数据类型，改变列需要ALTER TABLE，对于大表来说操作比较昂贵。</li>
+<li>很难使用索引。</li>
+</ul>
+<p>选择标识符</p>
+<p>一般标识列可能与其他值进行比较，或者寻找其他列，或者作为外键使用。因而选择标识符数据类型时，需要考虑存储类型，以及计算和比较的成本。</p>
+<p>最好类型是整数类型。</p>
+<p>对于标识列来说，ENUM和SET通常都是个糟糕的选择。他们更适合存储固定的信息。</p>
+<p>尽量避免字符串作为标识列，因为占空间和速度较慢。MYISAM引擎会对字符串默认做压缩索引的处理，造成查询更慢。</p>
+<p>完全随机字符串也会有影响，如MD5()，SHA1()或者UUID()产生的字符串，这些函数产生的新值会任意分布在很大的空间内，导致一些插入和查询语句很慢。</p>
+<p>如果存储uuid值，最好移除掉-符号，更好的方式是用UNHEX()函数将其转换为16字节的数字存储在BINARY(16)列中。检索时可以通过HEX()函数来格式化为16进制格式。</p>
+<p>MySQL Schema设计中的陷阱</p>
+<p>太多的列</p>
+<p>MySQL存储引擎API工作时需要在服务层和存储引擎层之间通过缓冲格式拷贝数据，然后在服务层将缓冲内容编码成各个列。</p>
+<p>太多的关联</p>
+<p>MySQL每个关联操作最多只能有61张表。如果希望查询执行的快且并发性好，单个查询最好在12个表以内。</p>
+<p>防止过度的使用枚举</p>
+<p>不要过度拒绝NULL</p>
+<p>范式和反范式</p>
+<p>范式化的数据库中，每个事实数据会出现并且只出现一次。相反，在反范式化的数据库中，</p>
+<p>范式化的好处</p>
+<p>范式化的更新操作通常比反范式化要快。</p>
+<p>需要修改的数据更少。</p>
+<p>范式化的表通常更小，可以更好的放在内存，操作速度更快。</p>
+<p>多余的数据少，意味着检索列表数据时更少需要distinct或者group by语句。</p>
+<p>范式化的缺点: 通常需要关联，会造成查询上的代价变高。</p>
+<p>反范式的好处</p>
+<p>schema所有数据都在一张表中，可以很好的避免关联。</p>
+<p>避免了随机IO。</p>
+<p>更有效的使用索引。</p>
+<p>最常见的反范式的方法是缓存或者复制。</p>
+<p>MySQL本身并不支持物化视图。</p>
+<p>计数器表</p>
+<p>加快ALTER TABLE的速度</p>
+<p>常见方式:</p>
+<p>现在一台不提供服务的机器上执行ALTER TABLE操作，然后和提供服务的主库进行切换。</p>
+<p>影子拷贝的方式。用要求的表结构创建一张和源表无关的新表，然后通过重命名和删表操作交换两张表。可以用一些工具来处理 online schema change或openark</p>
+<p>如果改变列可以用ALTER COLUMN的方式来处理。它只会修改.frm文件，而不涉及到表数据，因此非常快。</p>
+<p>只修改.frm文件</p>
+<p>创建一张有相同结构的空表做修改。</p>
+<p>执行FLUSH TABLES WITH READ LOCK。这将会关闭所有正在使用的表，并且，禁止任何表被打开。</p>
+<p>交换.frm文件。</p>
+<p>执行UNLOCK TABLES来释放读锁。</p>
+<p>DISABLE KEYS只对非唯一索引有效。</p>
+<p>总结</p>
+<p>小而简单总是好的。</p>
+<p>尽量避免过度设计。</p>
+<p>使用小而简单的合适数据类型，除非真实数据模型中有确切需要，否则尽量避免使用NULL值。</p>
+<p>尽量使用相同的数据类型存储相似或相关的值，尤其是要在关联条件中使用的列。</p>
+<p>注意可变长字符串，其在临时表和排序时可能导致悲观的按最大长度分配内存。</p>
+<p>尽量使用整型定义标识列。</p>
+<p>避免使用MYSQL已经遗弃的特性，如指定浮点数的精度或整数的显示宽度等。</p>
+<p>小心使用ENUM和SET，不要滥用。</p>
+<p>最好避免使用BIT。</p>
+<p>Chapter 5 创建高性能索引</p>
+<p>索引基础</p>
+<p>索引可以包含一个或多个列，列顺序有关，MySQL只能高效地使用索引的最左前缀列。</p>
+<p>不同存储引擎索引的工作方式并不一样，并非所有的存储引擎都支持所有类型的索引。</p>
+<p>B-Tree索引</p>
+<p>大多数MySQL引擎支持BTree索引。Archive引擎除外，5.1版本以前不支持任何索引，以后的版本才开始支持单个自增列的索引。</p>
+<p>InnoDB用的是B+Tree。</p>
+<p>不同的存储引擎以不同的方式使用B-Tree索引，性能各不相同。MyISAM使用前缀压缩技术使得索引占用更少的空间，InnoDB则按照原有格式存储。MyISAM索引通过数据的物理位置引用被索引的行，而InnoDB则根据主键引用索引的行。</p>
+<p>B-Tree即平衡二叉树。有序，且每个叶子到根节点距离相同。</p>
+<img src="/2017/10/28/mysqlstudy/btree.png" alt="B-Tree" title="B-Tree">
+<p>BTree树搜索是从索引的根节点开始进行，根节点的槽中存放了指向子节点的指针，存储引擎根据这些指针向下查找。树的深度和表的大小直接相关。</p>
+<p>索引对多个值进行排序的依据是CREATE TABLE语句中定义索引时列的顺序。</p>
+<p>BTree索引适用于全键值，键值范围或最左前缀查找。</p>
+<p>因为索引树中的节点是有序的，因而支持按值查找，也支持Order By操作(按顺序查找)</p>
+<p>BTree索引限制：</p>
+<p>如果不是按照索引的最左列开始查找，则无法使用索引。</p>
+<p>不能跳过索引中的列。</p>
+<p>如果查询中有某个列的范围查询，则其右边所有列都无法使用索引优化查询。</p>
+<p>在优化性能时，可能需要使用相同的列但顺序不同的索引来满足不同类型的查询需求。</p>
+<p>哈希索引</p>
+<p>哈希索引基于哈希表实现，只有精确匹配索引所有列的查询才有效。MySQL中只有Memory引擎显式的支持hash索引(memory引擎的默认索引类型)。如果多个列的hash值相同，则会用链表的形式存放多个记录到同一个hash条目中。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;第一章 Mysql架构和历史&lt;/p&gt;
+&lt;p&gt;MySQL的两种基本锁&lt;/p&gt;
+&lt;p&gt;表锁和行级锁&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;表锁&lt;br&gt;读锁互不排斥，写锁互斥。Mysql 服务器层会根据情况添加表锁，如ALTER TABLE操作。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;行级
+    
+    </summary>
+    
+    
+      <category term="MySQL,数据库设计" scheme="http://yoursite.com/tags/MySQL-%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/"/>
+    
+  </entry>
   
   <entry>
     <title>正则表达式Tips</title>

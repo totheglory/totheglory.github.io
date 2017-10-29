@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2017/10/28/mysqlstudy/</loc>
+    
+    <lastmod>2017-10-29T07:05:42.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2017/08/23/regextips/</loc>
     
     <lastmod>2017-08-30T09:12:46.000Z</lastmod>
