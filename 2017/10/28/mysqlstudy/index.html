@@ -247,8 +247,7 @@
 <li>SET数据类型，改变列需要ALTER TABLE，对于大表来说操作比较昂贵。</li>
 <li>很难使用索引。</li>
 </ul>
-<p>#####选择标识符</p>
-<ul>
+<h5 id="选择标识符"><a href="#选择标识符" class="headerlink" title="选择标识符"></a>选择标识符</h5><ul>
 <li>一般标识列可能与其他值进行比较，或者寻找其他列，或者作为外键使用。因而选择标识符数据类型时，需要考虑存储类型，以及计算和比较的成本。最好的存储类型是整数类型。</li>
 <li>对于标识列来说，ENUM和SET通常都是个糟糕的选择。他们更适合存储固定的信息。</li>
 <li>尽量避免字符串作为标识列，因为占空间和速度较慢。MYISAM引擎会对字符串默认做压缩索引的处理，造成查询更慢。</li>
@@ -277,27 +276,29 @@
 <li><p>范式化的数据库中，每个事实数据会出现并且只出现一次。相反，在反范式化的数据库中，事实数据可能会出现多次，通俗来讲就是我们所说的字段冗余。</p>
 </li>
 <li><p>范式化的好处</p>
+</li>
+</ul>
 <blockquote>
 <p>范式化的更新操作通常比反范式化要快。</p>
 <p>需要修改的数据更少。</p>
 <p>范式化的表通常更小，可以更好的放在内存，操作速度更快。</p>
 <p>多余的数据少，意味着检索列表数据时更少需要distinct或者group by语句。</p>
 </blockquote>
-</li>
-<li><p>范式化的缺点</p>
+<ul>
+<li>范式化的缺点</li>
+</ul>
 <blockquote>
 <p>通常需要关联，会造成查询上的代价变高。</p>
 </blockquote>
-</li>
-<li><p>反范式的好处</p>
+<ul>
+<li>反范式的好处</li>
+</ul>
 <blockquote>
 <p>schema所有数据都在一张表中，可以很好的避免关联。</p>
 <p>避免了随机IO。</p>
 <p>更有效的使用索引。</p>
 <p>最常见的反范式的方法是缓存或者复制。</p>
 </blockquote>
-</li>
-</ul>
 <p>MySQL本身并不支持物化视图。需要第三方支持。</p>
 <p>#####如何加快ALTER TABLE的速度</p>
 <p>常见方式:</p>
@@ -305,6 +306,8 @@
 <li><p>现在一台不提供服务的机器上执行ALTER TABLE操作，然后和提供服务的主库进行切换。</p>
 </li>
 <li><p>影子拷贝的方式。用要求的表结构创建一张和源表无关的新表，然后通过重命名和删表操作交换两张表。可以用一些工具来处理 online schema change或openark。如果改变列可以用ALTER COLUMN的方式来处理。它只会修改.frm文件，而不涉及到表数据，因此非常快。具体地</p>
+</li>
+</ul>
 <blockquote>
 <p>创建一张有相同结构的空表做修改。</p>
 <p>执行FLUSH TABLES WITH READ LOCK。这将会关闭所有正在使用的表，并且，禁止任何表被打开。</p>
@@ -312,8 +315,6 @@
 <p>执行UNLOCK TABLES来释放读锁。</p>
 <p>DISABLE KEYS只对非唯一索引有效。</p>
 </blockquote>
-</li>
-</ul>
 <p>#####总结</p>
 <ul>
 <li>小而简单总是好的。</li>
@@ -321,13 +322,12 @@
 <li>使用小而简单的合适数据类型，除非真实数据模型中有确切需要，否则尽量避免使用NULL值。</li>
 <li>尽量使用相同的数据类型存储相似或相关的值，尤其是要在关联条件中使用的列。</li>
 <li>注意可变长字符串，其在临时表和排序时可能导致悲观的按最大长度分配内存。</li>
+<li>尽量使用整型定义标识列。</li>
+<li>避免使用MYSQL已经遗弃的特性，如指定浮点数的精度或整数的显示宽度等。</li>
+<li>小心使用ENUM和SET，不要滥用。</li>
+<li>最好避免使用BIT。</li>
 </ul>
-<p>尽量使用整型定义标识列。</p>
-<p>避免使用MYSQL已经遗弃的特性，如指定浮点数的精度或整数的显示宽度等。</p>
-<p>小心使用ENUM和SET，不要滥用。</p>
-<p>最好避免使用BIT。</p>
-<p>Chapter 5 创建高性能索引</p>
-<p>索引基础</p>
+<h4 id="Chapter-5-创建高性能索引"><a href="#Chapter-5-创建高性能索引" class="headerlink" title="Chapter 5 创建高性能索引"></a>Chapter 5 创建高性能索引</h4><p>索引基础</p>
 <p>索引可以包含一个或多个列，列顺序有关，MySQL只能高效地使用索引的最左前缀列。</p>
 <p>不同存储引擎索引的工作方式并不一样，并非所有的存储引擎都支持所有类型的索引。</p>
 <p>B-Tree索引</p>
@@ -345,7 +345,8 @@
 <p>不能跳过索引中的列。</p>
 <p>如果查询中有某个列的范围查询，则其右边所有列都无法使用索引优化查询。</p>
 <p>在优化性能时，可能需要使用相同的列但顺序不同的索引来满足不同类型的查询需求。</p>
-<p>哈希索引<br>哈希索引基于哈希表实现，只有精确匹配索引所有列的查询才有效。MySQL中只有Memory引擎显式的支持hash索引(memory引擎的默认索引类型)。如果多个列的hash值相同，则会用链表的形式存放多个记录到同一个hash条目中。</p>
+<p>哈希索引</p>
+<p>哈希索引基于哈希表实现，只有精确匹配索引所有列的查询才有效。MySQL中只有Memory引擎显式的支持hash索引(memory引擎的默认索引类型)。如果多个列的hash值相同，则会用链表的形式存放多个记录到同一个hash条目中。</p>
 <p>Hash索引的特点:</p>
 <ul>
 <li>Hash索引只包含hash值和行指针，而不存储字段值，所以不能使用索引的值来避免读取行。不过，访问内存中的行的速度很快，对性能影响不大。</li>
@@ -361,7 +362,7 @@
 <h5 id="R-Tree-空间索引"><a href="#R-Tree-空间索引" class="headerlink" title="R-Tree 空间索引"></a>R-Tree 空间索引</h5><p>MyISAM支持空间索引，可以用于地理数据存储，数据需要用到Mysql的GIS相关函数。相对不太完善，一般都用PostgreSQL的PostGIS。</p>
 <h5 id="全文索引"><a href="#全文索引" class="headerlink" title="全文索引"></a>全文索引</h5><p>查找文本中的关键词，而非直接比较索引值。类似于搜索引擎。匹配方式也和其他索引不一样。相同的列可以同时创建全文索引和Btree索引。</p>
 <h5 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h5><p>其他三方数据库引擎的索引，如TokuDB的分形树索引 fractal tree index等。</p>
-<h4 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h4><ul>
+<h5 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h5><ul>
 <li>大大减少了服务器需要扫描的数据量</li>
 <li>可以帮助服务器避免排序和临时表</li>
 <li>可以随机I/O变顺序I/O</li>
@@ -384,7 +385,7 @@
 <h5 id="选择索引列的基本法则"><a href="#选择索引列的基本法则" class="headerlink" title="选择索引列的基本法则"></a>选择索引列的基本法则</h5><p>当不需要考虑排序和分组时，将选择性最高的列放在前面。这时索引只优化WHERE条件的查找。如WHERE条件中有A和B，Where A and B，选择A在前还是B在前时，可以先跑一些查询看看两个条件下那个条件查询出来的结果更少，就把哪个条件放在前。如 select sum(A),sum(b) from table。但这种情况有可能比较片面。</p>
 <p>因此最好使用select  count(distinct 字段A)/count(1) , count(distinct 字段B)/count(1) from table来看那个字段对应的值可辨识度更高，来作为前面的字段。</p>
 <p>where子句中排序，分组和范围条件等其他因素，对查询性能造成的影响可能更大。</p>
-<h4 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h4><p>聚簇索引并非单独的索引类型，而是一种数据存储方式。InnoDB的聚簇索引实际上在同一个结构中保存了B-Tree索引和数据行。聚簇表示数据行和相邻键值紧凑的存在一起。因为无法把数据行存放在两个不同的地方，因此一个表理论上只能有一个聚簇索引，不过覆盖索引可以模拟多个聚簇索引的情况。</p>
+<h5 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h5><p>聚簇索引并非单独的索引类型，而是一种数据存储方式。InnoDB的聚簇索引实际上在同一个结构中保存了B-Tree索引和数据行。聚簇表示数据行和相邻键值紧凑的存在一起。因为无法把数据行存放在两个不同的地方，因此一个表理论上只能有一个聚簇索引，不过覆盖索引可以模拟多个聚簇索引的情况。</p>
 <p>以InnoDB举例，InnoDB一般通过主键聚集数据，如果未定义主键，InnoDB会选择一个唯一的非空索引代替。如果没有这样的索引，InnoDB会隐式定义一个主键来作为聚簇索引。</p>
 <p>聚簇索引本身是个双刃剑，特别是做引擎迁移时尤其要注意性能。</p>
 <p>优点:</p>
@@ -441,8 +442,10 @@
 <li><p>查询优化，库表结构优化，索引优化都要考虑和调整。</p>
 </li>
 <li><p>大部分性能低下的查询都可以通过减少访问数据量的方式来优化。通常用两个步骤来分析：</p>
-<blockquote>
+</li>
+</ul>
 <p>确认应用程序是否检索了大量超过需要的数据，这意味着访问了太多的行，但有时间也可能是访问了太多的列。</p>
+<blockquote>
 <ul>
 <li>查询了不需要的记录</li>
 <li>多表关联返回全部列</li>
@@ -456,8 +459,9 @@
 <li>explain中的Type列反应了访问类型。如果查询没有办法找到合适的访问类型，最好的办法就是加一个合适的索引。</li>
 </ul>
 </blockquote>
-</li>
-<li><p>MySql能够使用如下三种方式应用Where条件</p>
+<ul>
+<li>MySql能够使用如下三种方式应用Where条件</li>
+</ul>
 <blockquote>
 <ul>
 <li>在索引中使用where条件来过滤不匹配的记录。存储引擎层完成。</li>
@@ -465,8 +469,9 @@
 <li>数据表中返回数据，然后过滤不满足条件的记录。服务器层完成。</li>
 </ul>
 </blockquote>
-</li>
-<li><p>如果发现查询扫描了大量的数据，只返回了少数的行，则可以从以下几点考虑优化</p>
+<ul>
+<li>如果发现查询扫描了大量的数据，只返回了少数的行，则可以从以下几点考虑优化</li>
+</ul>
 <blockquote>
 <ul>
 <li><p>使用覆盖索引，查询的列放在索引中，无需再次回表查询。</p>
@@ -485,8 +490,51 @@
 </li>
 </ul>
 </blockquote>
-<p>#####MySQL 查询</p>
-<p>​</p>
+<p>  ​</p>
+<h5 id="MySQL-查询"><a href="#MySQL-查询" class="headerlink" title="MySQL 查询"></a>MySQL 查询</h5><p>Mysql查询的基本路径</p>
+<img src="/2017/10/28/mysqlstudy/mysqlexec.png" title="Mysql Exceute Trace">
+<p>MySQL客户端和服务器之间采用的是半双工通信，任何一个时刻都是要么服务器发送数据给客户端，要么客户端发送数据给服务器，不能同时发生。客户端用一个单独的数据包将查询传给服务器，这也是为什么查询语句很长时，参数max_allowed_packet很重要。相反的，服务端返回给客户端的数据包会分为很多个，客户端必须完整的接受整个返回结果，这也是为什么要加limit的原因。</p>
+<h5 id="查询状态"><a href="#查询状态" class="headerlink" title="查询状态"></a>查询状态</h5><p>用SHOW FULL PROCESSLIST命令查询所有的状态。</p>
+<ul>
+<li>Sleep   — 线程正在等待客户端发送新的请求。</li>
+<li>Query  — 线程正在执行查询或者正在将结果发送给客户端。</li>
+<li>Locked — MySQL服务层，该线程正在等待表锁。存储引擎级别实现的锁，如InnoDB的行锁，并不会体现在线程状态中。</li>
+<li>Analyzing and statistics — 线程正在收集存储引擎的统计信息，并生成查询的执行计划。</li>
+<li>Copying to tmp table [on disk] — 线程正在执行查询，并将结果复制到临时表，一般要么是GROUP BY , FILE SORT，或者UNION等。如果包含on disk标识，表示MySQL正在将一个内存临时表刷入磁盘。</li>
+<li>Sorting result —  线程正在对结果集进行排序。</li>
+<li>Sending data — 线程可能在多个状态之间传输数据 或者 在生成结果集 或者在向客户端返回数据</li>
+</ul>
+<h5 id="Mysql-查询优化时选择错误的执行计划的原因"><a href="#Mysql-查询优化时选择错误的执行计划的原因" class="headerlink" title="Mysql 查询优化时选择错误的执行计划的原因"></a>Mysql 查询优化时选择错误的执行计划的原因</h5><ul>
+<li><p>统计信息不准确</p>
+</li>
+<li><p>执行计划中的成本估计不等同于执行成本。</p>
+</li>
+<li><p>MySQL认为的最优和实际用户的目标并不一定一致。</p>
+</li>
+<li><p>MySQL从不考虑并发执行的场景。</p>
+</li>
+<li><p>MySQL也并不是任何时候都是基于成本的优化，有时也会基于一定的规则。</p>
+</li>
+<li><p>MySQL不考虑不受其控制的操作成本，如执行存储过程或者用户自定义函数等成本。</p>
+</li>
+<li><p>优化器也无法估算所有的执行计划。</p>
 </li>
 </ul>
-</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://yoursite.com/2017/10/28/mysqlstudy/" data-id="cjb0x03lj000euy1hlcqcjqnn" class="article-share-link">Share</a><div class="tags"><a href="/tags/MySQL-数据库设计/">MySQL,数据库设计</a></div><div class="post-nav"><a href="/2017/08/23/regextips/" class="next">正则表达式Tips</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://yoursite.com"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Categories</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/chubby-paxos/" style="font-size: 15px;">chubby paxos</a> <a href="/tags/JDK-Class文件/" style="font-size: 15px;">JDK,Class文件</a> <a href="/tags/分布式锁-GFS-Big-Table/" style="font-size: 15px;">分布式锁,GFS,Big Table</a> <a href="/tags/Java原理/" style="font-size: 15px;">Java原理</a> <a href="/tags/JMM/" style="font-size: 15px;">JMM</a> <a href="/tags/JAVA-IO-JDK-File/" style="font-size: 15px;">JAVA IO, JDK , File</a> <a href="/tags/regex，DFA，NFA/" style="font-size: 15px;">regex，DFA，NFA</a> <a href="/tags/MySQL-数据库设计/" style="font-size: 15px;">MySQL,数据库设计</a> <a href="/tags/paxos-分布式/" style="font-size: 15px;">paxos,分布式</a> <a href="/tags/zab-ZooKeeper/" style="font-size: 15px;">zab, ZooKeeper</a> <a href="/tags/分布式一致性-zookeeper-ZAB/" style="font-size: 15px;">分布式一致性,zookeeper,ZAB</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Recent</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/28/mysqlstudy/">高性能MySQL 学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/23/regextips/">正则表达式Tips</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/13/jmm/">Java Memory Model</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/11/javaio/">javaio</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/10/javaclass/">Java Class文件</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/20/javacompile/">Java类编译，加载，执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/10/file/">JAVA IO -- File</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/29/zab/">zab 协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/25/zookeeper/">zookeeper简介</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/12/paxosinchubby/">paxos在chubby的应用</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Links</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">terrence mu's blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
+<p>MySQL的优化分为静态优化和动态优化，静态优化可以认为是编译时优化，动态优化可以认为是执行时优化。</p>
+<p>MySQL可以处理的优化，有以下几种，</p>
+<ul>
+<li>重新定义表关联顺序</li>
+<li>将外连接转换为内连接</li>
+<li>使用等价变化简化和规范表达式</li>
+<li>优化count(),min()和max()</li>
+<li>预计并转化为常数表达式</li>
+<li>覆盖索引查询</li>
+<li>子查询优化，减少子查询对数据的访问</li>
+<li>提前终止查询</li>
+<li>等值传播</li>
+<li>列表IN()的比较</li>
+</ul>
+<p>MySQL的执行计划总是一颗左侧深度优先的树。</p>
+<p>  ​</p>
+<p>  ​</p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://yoursite.com/2017/10/28/mysqlstudy/" data-id="cjds5us8u000zpk1hmexndn6w" class="article-share-link">Share</a><div class="tags"><a href="/tags/MySQL-数据库设计/">MySQL,数据库设计</a></div><div class="post-nav"><a href="/2018/01/29/springmark/" class="pre">Spring key point mark on</a><a href="/2017/08/23/regextips/" class="next">正则表达式Tips</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://yoursite.com"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Categories</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/chubby-paxos/" style="font-size: 15px;">chubby paxos</a> <a href="/tags/JAVA-IO-JDK-File/" style="font-size: 15px;">JAVA IO, JDK , File</a> <a href="/tags/分布式锁-GFS-Big-Table/" style="font-size: 15px;">分布式锁,GFS,Big Table</a> <a href="/tags/Java原理/" style="font-size: 15px;">Java原理</a> <a href="/tags/regex，DFA，NFA/" style="font-size: 15px;">regex，DFA，NFA</a> <a href="/tags/JMM/" style="font-size: 15px;">JMM</a> <a href="/tags/JDK-Class文件/" style="font-size: 15px;">JDK,Class文件</a> <a href="/tags/zab-ZooKeeper/" style="font-size: 15px;">zab, ZooKeeper</a> <a href="/tags/分布式一致性-zookeeper-ZAB/" style="font-size: 15px;">分布式一致性,zookeeper,ZAB</a> <a href="/tags/paxos-分布式/" style="font-size: 15px;">paxos,分布式</a> <a href="/tags/spring-spring-boot-key-point/" style="font-size: 15px;">spring, spring boot, key point</a> <a href="/tags/MySQL-数据库设计/" style="font-size: 15px;">MySQL,数据库设计</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Recent</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/01/29/springmark/">Spring key point mark on</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/28/mysqlstudy/">高性能MySQL 学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/23/regextips/">正则表达式Tips</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/13/jmm/">Java Memory Model</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/11/javaio/">javaio</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/10/javaclass/">Java Class文件</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/20/javacompile/">Java类编译，加载，执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/10/file/">JAVA IO -- File</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/29/zab/">zab 协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/25/zookeeper/">zookeeper简介</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Links</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">terrence mu's blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

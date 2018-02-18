@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="keep moving"><title>Spring key point mark on | terrence mu's blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Spring key point mark on</h1><a id="logo" href="/.">terrence mu's blog</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> Home</i></a><a href="/archives/"><i class="fa fa-archive"> Archive</i></a><a href="/about/"><i class="fa fa-user"> About</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Spring key point mark on</h1><div class="post-meta">Jan 29, 2018<script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><p>Spring &amp; Spring boot related mark</p>
+<h4 id="Event"><a href="#Event" class="headerlink" title="Event"></a>Event</h4><p>ApplicationEvent - create application event<br>ApplicationListener - listen application event<br>ApplicationContext 继承自 ApplicationEventPublisher -  publish applicaton event</p>
+<h4 id="Aware"><a href="#Aware" class="headerlink" title="Aware"></a>Aware</h4><p>BeanNameAware - 获取容器中BeanName</p>
+<p>BeanFactoryAware - 获得当前bean factory</p>
+<p>ApplicationContextAware - 当前的applicationContext,继承类ApplicationObjectSupport</p>
+<p>MessageSourceAware - 获取MessageSource，获取文本信息</p>
+<p>ApplicationEventPublisherAware - 应用事件发布器，发布事件</p>
+<p>ResourceLoaderAware - 获取资源加载器，获取外部资源</p>
+<h4 id="Conditional"><a href="#Conditional" class="headerlink" title="Conditional"></a>Conditional</h4><p>condition来match不同的条件，并进行不同的处理。</p>
+<h4 id="组合注解"><a href="#组合注解" class="headerlink" title="组合注解"></a>组合注解</h4><p>将多个元注解合并，定义为组合注解，简化配置。</p>
+<h4 id="Enable-注解"><a href="#Enable-注解" class="headerlink" title="Enable*注解"></a>Enable*注解</h4><p>@EnableAspectJAutoProxy开启对AspectJ自动代理的支持。</p>
+<p>@EnableAsync开启异步方法的支持。</p>
+<p>@EnableScheduling 开启计划任务的支持。</p>
+<p>@EnableWebMvc开启Web MVC的支持</p>
+<p>@EnableConfigurationProperties开启对@ConfigurationProperties注解配置Bean的支持。</p>
+<p>@EnableJpaRepositories开启对Spring DataJPA Repository的支持。</p>
+<p>@EnableTransactionManagement开启注解事务的支持。</p>
+<p>@EnableCaching开启注解式的缓存支持。</p>
+<p>所有Enable都包含一个@Import注解，用来导入配置类的。导入了一些自动配置的Bean。这些导入配置的方式主要分为三种类型:</p>
+<ul>
+<li>直接导入配置类</li>
+<li>依据条件选择配置类</li>
+<li>动态注册Bean</li>
+</ul>
+<p>servlet3.0可以通过webApplicationInitializer替代web.xml，实现该接口将会被SpringServletContainerInitializer获取到。</p>
+<p>通过重写WebMvcCOnfigureAdapter的addInterceptors方法来注册自定义的拦截器。</p>
+<p>@ControllerAdvice用于controller的全局配置，@ExceptionHandler 用于全局处理控制器的异常。</p>
+<p>@InitBinder，用来设置WebDataBinder，WebDataBinder用来自动绑定前台请求参数到model中。</p>
+<p>@ModelAttribute，绑定键值对到Model中，此处是让全局的@RequestMapping都能获得在此处设置的键值对。</p>
+<p>Spring通过MultipartResolver来上传文件。</p>
+<p>spring的消息推送</p>
+<ol>
+<li>RequestMapping中通过produces设置为「text/event-stream」来实现服务端往浏览器的消息推送。</li>
+<li>servlet3.0的异步方式，setAsyncSupported为true。</li>
+</ol>
+<p>@SpringBootApplication 注解组合了@Configuration，@EnableAutoConfiguration，@ComponentScan，</p>
+<p>可以通过exclude参数关闭特定的自动配置，如@SpringBootApplication(exclude={DataSourceAutoConfiguration.class})</p>
+<p>Banner定制src/main/resources下新建banner.txt。<a href="http://patorjk.com/software/taag生成字符。" target="_blank" rel="noopener">http://patorjk.com/software/taag生成字符。</a></p>
+<p>=================================================================================</p>
+<p>Spring boot Related</p>
+<p>Spring boot 官方提供的starter</p>
+<p>Spring-boot-starter SpringBoot核心Starter，包含自动配置，日志，yaml配置文件的支持。</p>
+<p>Spring-boot-starter-actuator 准生产特性，用来监控和管理应用</p>
+<p>Spring-boot-starter-remote-shell 提供SSH协议的监控和管理</p>
+<p>Spring-boot-starter-remote-amqp 使用Spring-rabbit对AMQP协议支持</p>
+<p>Spring-boot-starter-remote-aop 使用Spring-aop和AspectJ面向切面编程支持</p>
+<p>Spring-boot-starter-remote-batch Spring batch的支持</p>
+<p>Spring-boot-starter-cloud-connectors 对云平台提供服务提供简化的连接方式</p>
+<p>Spring-boot-starter-data-elasitcsearch 通过spring-data-elasticsearch对elasticsearch支持</p>
+<p>Spring-boot-starter-data-gemfire  通过spring-data-gemfire 对gemfire  支持</p>
+<p>Spring-boot-starter-data-jpa 对 JPA支持，包含spring-data-jpa，spring-orm和Hibernate</p>
+<p>Spring-boot-starter-data-mangodb 通过spring-data-mangoDB 对mangoDB支持</p>
+<p>Spring-boot-starter-data-rest 通过spring-data-rest-webmvc 对spring data repositoty暴露未REST形式的服务</p>
+<p>Spring-boot-starter-data-solr 通过spring-data-solr对apache solr数据检索平台的支持</p>
+<p>Spring-boot-starter-freemaker 对freemaker模板引擎的支持</p>
+<p>Spring-boot-starter-groovy-templates 对Groovy模板引擎的支持</p>
+<p>Spring-boot-starter-hateoas 通过spring-hateoas对基于HATEOAS的REST形式的网络服务的支持</p>
+<p>Spring-boot-starter-hornetq 通过HornetQ对JMS的支持</p>
+<p>Spring-boot-starter-integration 对系统继承框架spring-integeration的支持</p>
+<p>Spring-boot-starter-jdbc 对JDBC数据库的支持</p>
+<p>Spring-boot-starter-jersey 对Jersey REST形式的网络服务的支持</p>
+<p>Spring-boot-starter-atomikos 通过Atomikos对分布式事务的支持</p>
+<p>Spring-boot-starter-bitronix 通过Bitronix对分布式事务的支持</p>
+<p>Spring-boot-starter-mail 对javax.mail的支持</p>
+<p>Spring-boot-starter-mobile 对spring-mobile的支持</p>
+<p>Spring-boot-starter-mustache 对Mustache模板引擎的支持</p>
+<p>Spring-boot-starter-redis 对键值对内存数据库redis的支持，包含spring-redis</p>
+<p>Spring-boot-starter-security 对spring-security的支持</p>
+<p>Spring-boot-starter-social-facebook 通过 Spring-social-facebook对facebook的支持</p>
+<p>Spring-boot-starter-social-linkin 通过 Spring-social-linkin对linkin的支持</p>
+<p>Spring-boot-starter-social-twitter 通过 Spring-social-twitter对twitter的支持</p>
+<p>Spring-boot-starter-test 对常用测试框架Junit，Hamcrest和mokito的支持，包含spring-test模块</p>
+<p>Spring-boot-starter-thymeleaf 对thymeleaf模板引擎的支持</p>
+<p>Spring-boot-starter-velocity 对velocity模板引擎的支持</p>
+<p>Spring-boot-starter-web 对web项目开发的支持，包含tomcat和spring-webmvc</p>
+<p>Spring-boot-starter-Tomcat spring boot默认的servlet容器Tomcat</p>
+<p>Spring-boot-starter-Jetty 使用Jetty作为servlet容器替换tomcat</p>
+<p>Spring-boot-starter-Undertow 使用undertow作为servlet容器替换tomcat</p>
+<p>Spring-boot-starter-logging  spingboot 默认支持日志框架logback</p>
+<p>Spring-boot-starter-log4j 对log4j的支持</p>
+<p>Spring-boot-starter-websocket 对websocket的支持</p>
+<p>Spring-boot-starter-ws 对spring web services的支持</p>
+<p>@ConfigurationProperties可以获取application.properties中的数据，通过prefix属性指定properties的配置的前缀。具体可以参见ConfigurationProperties的源码。</p>
+<p>通过logging.file=日志目录，logging.level.包名=日志级别</p>
+<p>application-{profile}.properties 中的profile用于不同环境的配置。可以在application.properties中设置spring.profiles.active=prod来指定活动的Profile。</p>
+<h5 id="Spring-boot-运行原理"><a href="#Spring-boot-运行原理" class="headerlink" title="Spring boot 运行原理"></a>Spring boot 运行原理</h5><p>核心功能是由@EnableAutoConfiguration提供的。它由AutoConfigurationImportSelector通过SpringFactoriesLoader.loadFactoryNames来获取META-INF/spring.factories下的jar包。具体如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"># PropertySource Loaders</div><div class="line">org.springframework.boot.env.PropertySourceLoader=\</div><div class="line">org.springframework.boot.env.PropertiesPropertySourceLoader,\</div><div class="line">org.springframework.boot.env.YamlPropertySourceLoader</div><div class="line"></div><div class="line"># Run Listeners</div><div class="line">org.springframework.boot.SpringApplicationRunListener=\</div><div class="line">org.springframework.boot.context.event.EventPublishingRunListener</div><div class="line"></div><div class="line"># Application Context Initializers</div><div class="line">org.springframework.context.ApplicationContextInitializer=\</div><div class="line">org.springframework.boot.context.ConfigurationWarningsApplicationContextInitializer,\</div><div class="line">org.springframework.boot.context.ContextIdApplicationContextInitializer,\</div><div class="line">org.springframework.boot.context.config.DelegatingApplicationContextInitializer,\</div><div class="line">org.springframework.boot.context.embedded.ServerPortInfoApplicationContextInitializer</div><div class="line"></div><div class="line"># Application Listeners</div><div class="line">org.springframework.context.ApplicationListener=\</div><div class="line">org.springframework.boot.ClearCachesApplicationListener,\</div><div class="line">org.springframework.boot.builder.ParentContextCloserApplicationListener,\</div><div class="line">org.springframework.boot.context.FileEncodingApplicationListener,\</div><div class="line">org.springframework.boot.context.config.AnsiOutputApplicationListener,\</div><div class="line">org.springframework.boot.context.config.ConfigFileApplicationListener,\</div><div class="line">org.springframework.boot.context.config.DelegatingApplicationListener,\</div><div class="line">org.springframework.boot.liquibase.LiquibaseServiceLocatorApplicationListener,\</div><div class="line">org.springframework.boot.logging.ClasspathLoggingApplicationListener,\</div><div class="line">org.springframework.boot.logging.LoggingApplicationListener</div><div class="line"></div><div class="line"># Environment Post Processors</div><div class="line">org.springframework.boot.env.EnvironmentPostProcessor=\</div><div class="line">org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor,\</div><div class="line">org.springframework.boot.env.SpringApplicationJsonEnvironmentPostProcessor</div><div class="line"></div><div class="line"># Failure Analyzers</div><div class="line">org.springframework.boot.diagnostics.FailureAnalyzer=\</div><div class="line">org.springframework.boot.diagnostics.analyzer.BeanCurrentlyInCreationFailureAnalyzer,\</div><div class="line">org.springframework.boot.diagnostics.analyzer.BeanNotOfRequiredTypeFailureAnalyzer,\</div><div class="line">org.springframework.boot.diagnostics.analyzer.BindFailureAnalyzer,\</div><div class="line">org.springframework.boot.diagnostics.analyzer.ConnectorStartFailureAnalyzer,\</div><div class="line">org.springframework.boot.diagnostics.analyzer.NoUniqueBeanDefinitionFailureAnalyzer,\</div><div class="line">org.springframework.boot.diagnostics.analyzer.PortInUseFailureAnalyzer,\</div><div class="line">org.springframework.boot.diagnostics.analyzer.ValidationExceptionFailureAnalyzer</div><div class="line"></div><div class="line"># FailureAnalysisReporters</div><div class="line">org.springframework.boot.diagnostics.FailureAnalysisReporter=\</div><div class="line">org.springframework.boot.diagnostics.LoggingFailureAnalysisReporter</div></pre></td></tr></table></figure>
+<h4 id="Web相关配置"><a href="#Web相关配置" class="headerlink" title="Web相关配置"></a>Web相关配置</h4><p>自动配置的ViewResolver</p>
+<ul>
+<li><p>ContentNegotiatingViewResolver</p>
+<p>代理不同的viewResolver来处理不同的view，拥有最高的优先级。</p>
+</li>
+<li><p>BeanNameViewResolver</p>
+<p>会查找对应的Bean名称来返回字符串的View渲染视图</p>
+</li>
+<li><p>InternalResourceViewResolver</p>
+<p>通过设置前缀，后缀，以及控制器中的方法来返回视图名的字符串，已得到实际页面。</p>
+</li>
+</ul>
+<p>自动配置静态资源，通过addResourceHandlers方法来定义。</p>
+<p>在WebAutoConfigure中定义Formatter，Conveter，HttpMessageConverters。可以自定义HttpMessageConveter，通过@Bean的方式来定义。</p>
+<p>替代Spring boot的MVC配置，定义一个配置类并继承WebMvcConfigurerAdapter。</p>
+<p>@Configuration</p>
+<p>public class WebMvcConfig extends WebMvcConfigureAdapter{</p>
+<p>​        @Override    </p>
+<p>​    public void addViewControllers(ViewControllerRegistry registry){</p>
+<p>​                    registry.addViewController(“/xx”).setViewName(“/xx”);</p>
+<p>​    }</p>
+<p>}</p>
+<h4 id="注册Servlet，Filter，Listener"><a href="#注册Servlet，Filter，Listener" class="headerlink" title="注册Servlet，Filter，Listener"></a>注册Servlet，Filter，Listener</h4><ul>
+<li>直接声明Spring Bean的方式 @Bean</li>
+<li>分别实例ServletRegistrationBean来注册servlet，FilterRegistrationBean注册Filter，ServletListenerRegistrationBean来注册Listener</li>
+</ul>
+<h4 id="代码配置Servlet容器"><a href="#代码配置Servlet容器" class="headerlink" title="代码配置Servlet容器"></a>代码配置Servlet容器</h4><p>可以实现一个EmbeddedServletContainerCustomizer接口的Bean，如果想直接配置Tomcat，Jetty或者Undertow，可以通过对应的定义来直接定义TomcatEmbeddedServletContainerFactory, JettyEmbeddedServletContainerFactory, UndertowEmbeddedServletContainerFactory。</p>
+<h4 id="SSL配置"><a href="#SSL配置" class="headerlink" title="SSL配置"></a>SSL配置</h4><ul>
+<li><p>生成证书</p>
+<p>keytool生成自签名证书，输入命令keytool -genkey  -alias tomcat，在当前目录生成一个.keystore文件。</p>
+</li>
+<li><p>添加配置</p>
+<p>把.keystore复制到根目录，并配置</p>
+<p>server.port = 8443</p>
+<p>server.ssl.key-store=.keystore</p>
+<p>server.ssl.key-store-password=111111</p>
+<p>server.ssl.keyStoreType=JKS</p>
+<p>server.ssl.keyAlias:tomcat</p>
+</li>
+<li><p>重定向HTTP到HTTPS</p>
+<p>重新设置Http Connector Port 8080到8443。</p>
+</li>
+</ul>
+<p>WebSocket支持，需要引入spring-boot-starter-websocket。</p>
+<h4 id="Spring-Cache缓存"><a href="#Spring-Cache缓存" class="headerlink" title="Spring Cache缓存"></a>Spring Cache缓存</h4><ul>
+<li>Spring支持CacheManager</li>
+</ul>
+<p>SimpleCacheManager — 使用简单的Collection来存储缓存，主要用来测试用途</p>
+<p>ConcurrentMapCacheManager — 使用ConcurrentMap来存储缓存</p>
+<p>NoOpCacheManager — 仅测试用途，不会实际存储操作</p>
+<p>EhCacheManager, GuavaCacheManager, HazelcastCacheManager, JCacheCacheManager(支持JSR-107标准的实现), RedisCacheManager。</p>
+<ul>
+<li>声名式缓存注解</li>
+</ul>
+<p>@Cacheable 在方法执行前Spring先查看缓存中是否有数据，如果有数据，则直接返回缓存数据，若没有则写入。</p>
+<p>@CachePut 无论如何都会把返回值写入到缓存</p>
+<p>@CacheEvict 将一条或多条数据从缓存中删除</p>
+<p>@Caching 可以通过@Caching注解组合多个注解策略在一个方法上</p>
+<p>开启声明式缓存</p>
+<p>@Configuration</p>
+<p>@EnableCaching</p>
+<p>public class AppConfig{}</p>
+<p>Spring boot 默认使用SimpleCacheConfiguration，即使用ConcurrentMap来做缓存。Spring Boot支持以 spring.cache未前缀来配置缓存。</p>
+<p>spring.cache.type=#可选 generic,ehcache,hazelcast,redis,guava,simple,none,infinispan,jcache等</p>
+<p>spring.cache.cache-name=#程序启动创建缓存名称</p>
+<p>spring.cache.guava.spec=#guava specs</p>
+<p>Application上也可开启@EnableCaching。</p>
+<h4 id="异步消息的支持"><a href="#异步消息的支持" class="headerlink" title="异步消息的支持"></a>异步消息的支持</h4><p>异步消息中两个很重要的概念，消息代理和目的地。目的地主要包含两种形式：队列和主题，队列用于点对点式的消息通信，主题用于发布/订阅式的消息通信。</p>
+<p>Spring为JMS，AMQP提供了@JmsListener和@RabbitListner注解在方法上监听消息代理发布的消息，需要@EnableJms或者@EnableRabbit来开启。</p>
+<p>ActiveMQConnectionFactoryFactory来配置ActiveMQ的Bean连接，并通过前缀为spring.activemq的属性来配置对应的参数。</p>
+<p>Spring Integration提供基于Spring的EIP的实现，解决不同系统之间的交互问题，通过异步消息驱动来达到系统交互时的系统之间的松耦合。</p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://yoursite.com/2018/01/29/springmark/" data-id="cjds5us8j000wpk1h9hb8s50u" class="article-share-link">Share</a><div class="tags"><a href="/tags/spring-spring-boot-key-point/">spring, spring boot, key point</a></div><div class="post-nav"><a href="/2017/10/28/mysqlstudy/" class="next">高性能MySQL 学习笔记</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://yoursite.com"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Categories</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/chubby-paxos/" style="font-size: 15px;">chubby paxos</a> <a href="/tags/JAVA-IO-JDK-File/" style="font-size: 15px;">JAVA IO, JDK , File</a> <a href="/tags/分布式锁-GFS-Big-Table/" style="font-size: 15px;">分布式锁,GFS,Big Table</a> <a href="/tags/Java原理/" style="font-size: 15px;">Java原理</a> <a href="/tags/regex，DFA，NFA/" style="font-size: 15px;">regex，DFA，NFA</a> <a href="/tags/JMM/" style="font-size: 15px;">JMM</a> <a href="/tags/JDK-Class文件/" style="font-size: 15px;">JDK,Class文件</a> <a href="/tags/zab-ZooKeeper/" style="font-size: 15px;">zab, ZooKeeper</a> <a href="/tags/分布式一致性-zookeeper-ZAB/" style="font-size: 15px;">分布式一致性,zookeeper,ZAB</a> <a href="/tags/paxos-分布式/" style="font-size: 15px;">paxos,分布式</a> <a href="/tags/spring-spring-boot-key-point/" style="font-size: 15px;">spring, spring boot, key point</a> <a href="/tags/MySQL-数据库设计/" style="font-size: 15px;">MySQL,数据库设计</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Recent</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/01/29/springmark/">Spring key point mark on</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/28/mysqlstudy/">高性能MySQL 学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/23/regextips/">正则表达式Tips</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/13/jmm/">Java Memory Model</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/11/javaio/">javaio</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/10/javaclass/">Java Class文件</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/20/javacompile/">Java类编译，加载，执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/10/file/">JAVA IO -- File</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/29/zab/">zab 协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/25/zookeeper/">zookeeper简介</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Links</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">terrence mu's blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
