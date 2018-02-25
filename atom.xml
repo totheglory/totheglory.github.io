@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-02-17T16:10:46.000Z</updated>
+  <updated>2018-02-25T15:04:47.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -16,52 +16,55 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Spring key point mark on</title>
-    <link href="http://yoursite.com/2018/01/29/springmark/"/>
-    <id>http://yoursite.com/2018/01/29/springmark/</id>
-    <published>2018-01-29T05:58:51.000Z</published>
-    <updated>2018-02-17T16:10:46.000Z</updated>
+    <title>Spring boot in Action 笔记</title>
+    <link href="http://yoursite.com/2018/02/18/springbootinaction/"/>
+    <id>http://yoursite.com/2018/02/18/springbootinaction/</id>
+    <published>2018-02-18T02:18:50.000Z</published>
+    <updated>2018-02-25T15:04:47.000Z</updated>
     
-    <content type="html"><![CDATA[<p>Spring &amp; Spring boot related mark</p>
-<h4 id="Event"><a href="#Event" class="headerlink" title="Event"></a>Event</h4><p>ApplicationEvent - create application event<br>ApplicationListener - listen application event<br>ApplicationContext 继承自 ApplicationEventPublisher -  publish applicaton event</p>
-<h4 id="Aware"><a href="#Aware" class="headerlink" title="Aware"></a>Aware</h4><p>BeanNameAware - 获取容器中BeanName</p>
-<p>BeanFactoryAware - 获得当前bean factory</p>
-<p>ApplicationContextAware - 当前的applicationContext,继承类ApplicationObjectSupport</p>
-<p>MessageSourceAware - 获取MessageSource，获取文本信息</p>
-<p>ApplicationEventPublisherAware - 应用事件发布器，发布事件</p>
-<p>ResourceLoaderAware - 获取资源加载器，获取外部资源</p>
-<h4 id="Conditional"><a href="#Conditional" class="headerlink" title="Conditional"></a>Conditional</h4><p>condition来match不同的条件，并进行不同的处理。</p>
-<h4 id="组合注解"><a href="#组合注解" class="headerlink" title="组合注解"></a>组合注解</h4><p>将多个元注解合并，定义为组合注解，简化配置。</p>
-<h4 id="Enable-注解"><a href="#Enable-注解" class="headerlink" title="Enable*注解"></a>Enable*注解</h4><p>@EnableAspectJAutoProxy开启对AspectJ自动代理的支持。</p>
-<p>@EnableAsync开启异步方法的支持。</p>
-<p>@EnableScheduling 开启计划任务的支持。</p>
-<p>@EnableWebMvc开启Web MVC的支持</p>
-<p>@EnableConfigurationProperties开启对@ConfigurationProperties注解配置Bean的支持。</p>
-<p>@EnableJpaRepositories开启对Spring DataJPA Repository的支持。</p>
-<p>@EnableTransactionManagement开启注解事务的支持。</p>
-<p>@EnableCaching开启注解式的缓存支持。</p>
-<p>所有Enable都包含一个@Import注解，用来导入配置类的。导入了一些自动配置的Bean。这些导入配置的方式主要分为三种类型:</p>
-<ul>
-<li>直接导入配置类</li>
-<li>依据条件选择配置类</li>
-<li>动态注册Bean</li>
+    <content type="html"><![CDATA[<h5 id="Spring-boot-提供的四个核心功能"><a href="#Spring-boot-提供的四个核心功能" class="headerlink" title="Spring boot 提供的四个核心功能"></a>Spring boot 提供的四个核心功能</h5><ul>
+<li>auto config - 声明式的标识，如@Bean来实现实例的自动注入。</li>
+<li>starter pom - 利用maven的传递依赖，组合常用的库。避免了多个库之间的存在的可能不兼容问题。</li>
+<li>命令行界面 - Spring boot CLI</li>
+<li>Actuator 提供如应用程序运行时内部运行的监控</li>
 </ul>
-<p>servlet3.0可以通过webApplicationInitializer替代web.xml，实现该接口将会被SpringServletContainerInitializer获取到。</p>
-<p>通过重写WebMvcCOnfigureAdapter的addInterceptors方法来注册自定义的拦截器。</p>
-<p>@ControllerAdvice用于controller的全局配置，@ExceptionHandler 用于全局处理控制器的异常。</p>
-<p>@InitBinder，用来设置WebDataBinder，WebDataBinder用来自动绑定前台请求参数到model中。</p>
-<p>@ModelAttribute，绑定键值对到Model中，此处是让全局的@RequestMapping都能获得在此处设置的键值对。</p>
-<p>Spring通过MultipartResolver来上传文件。</p>
-<p>spring的消息推送</p>
-<ol>
-<li>RequestMapping中通过produces设置为「text/event-stream」来实现服务端往浏览器的消息推送。</li>
-<li>servlet3.0的异步方式，setAsyncSupported为true。</li>
-</ol>
-<p>@SpringBootApplication 注解组合了@Configuration，@EnableAutoConfiguration，@ComponentScan，</p>
-<p>可以通过exclude参数关闭特定的自动配置，如@SpringBootApplication(exclude={DataSourceAutoConfiguration.class})</p>
-<p>Banner定制src/main/resources下新建banner.txt。<a href="http://patorjk.com/software/taag生成字符。" target="_blank" rel="noopener">http://patorjk.com/software/taag生成字符。</a></p>
-<p>=================================================================================</p>
-<p>Spring boot Related</p>
+<p>Spring boot CLI命令初始化项目: spring init -dweb,jpa,security - -build maven -p war -x</p>
+<p>-d后面跟依赖的信息。把CLI生成的项目解压到当前目录，使用 - - extract 或者 -x参数。</p>
+<p>spring help init 查看帮助</p>
+<p>sping init -l 列出init参数</p>
+<h5 id="Spring-boot-自动配置"><a href="#Spring-boot-自动配置" class="headerlink" title="Spring boot 自动配置"></a>Spring boot 自动配置</h5><p>@ConditionalOnMissingBean注解，可以用于覆盖自动配置。</p>
+<p>如@ConditionalOnMissingBean(ABC.class)如果当前不存在ABC类型，添加该注解的bean就会生效。</p>
+<p>Spring Boot能从多种属性源获得属性，具体如下，优先级从高到低，</p>
+<ul>
+<li>命令行参数 </li>
+<li>java:comp/env里的JNDI属性 </li>
+<li>JVM系统属性 </li>
+<li>操作系统环境变量</li>
+<li>随机生成的带random.*前缀的属性(在设置其他属性时,可以引用它们,比如${random. long}) </li>
+<li>应用程序以外的application.properties或者appliaction.yml文件 </li>
+<li>打包在应用程序内的application.properties或者appliaction.yml文件 </li>
+<li>通过@PropertySource标注的属性源 </li>
+</ul>
+<p>application.properties和application.yml文件能放在以下四个位置，优先级从高到低 </p>
+<ul>
+<li>外置,在相对于应用程序运行目录的/config子目录里。 </li>
+<li>外置,在应用程序运行的目录里。 </li>
+<li>内置,在config包内。 </li>
+<li>内置,在Classpath根目录。<br>另外，如果你在同一优先级位置同时有application.properties和application.yml,那么application.yml里的属性会覆盖application.properties里的属性。</li>
+</ul>
+<p>Spring boot默认的系统是logback，如果需要用别的日志系统，需要在starter中排除掉自动依赖，再重新单独引入。</p>
+<pre><code>&lt;dependency&gt;
+&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+&lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+&lt;exclusions&gt;
+    &lt;exclusion&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-logging&lt;/artifactId&gt;
+    &lt;/exclusion&gt;
+&lt;/exclusions&gt;
+&lt;/dependency&gt;
+</code></pre><p>如引入log4j</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">	&lt;artifactId&gt;spring-boot-starter-log4j&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
 <p>Spring boot 官方提供的starter</p>
 <p>Spring-boot-starter SpringBoot核心Starter，包含自动配置，日志，yaml配置文件的支持。</p>
 <p>Spring-boot-starter-actuator 准生产特性，用来监控和管理应用</p>
@@ -180,6 +183,64 @@
 <p>Spring为JMS，AMQP提供了@JmsListener和@RabbitListner注解在方法上监听消息代理发布的消息，需要@EnableJms或者@EnableRabbit来开启。</p>
 <p>ActiveMQConnectionFactoryFactory来配置ActiveMQ的Bean连接，并通过前缀为spring.activemq的属性来配置对应的参数。</p>
 <p>Spring Integration提供基于Spring的EIP的实现，解决不同系统之间的交互问题，通过异步消息驱动来达到系统交互时的系统之间的松耦合。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h5 id=&quot;Spring-boot-提供的四个核心功能&quot;&gt;&lt;a href=&quot;#Spring-boot-提供的四个核心功能&quot; class=&quot;headerlink&quot; title=&quot;Spring boot 提供的四个核心功能&quot;&gt;&lt;/a&gt;Spring boot 提供的四个核心功能&lt;/
+    
+    </summary>
+    
+    
+      <category term="spring boot" scheme="http://yoursite.com/tags/spring-boot/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring key point mark on</title>
+    <link href="http://yoursite.com/2018/01/29/springmark/"/>
+    <id>http://yoursite.com/2018/01/29/springmark/</id>
+    <published>2018-01-29T05:58:51.000Z</published>
+    <updated>2018-02-25T15:02:51.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>Spring &amp; Spring boot related mark</p>
+<h4 id="Event"><a href="#Event" class="headerlink" title="Event"></a>Event</h4><p>ApplicationEvent - create application event<br>ApplicationListener - listen application event<br>ApplicationContext 继承自 ApplicationEventPublisher -  publish applicaton event</p>
+<h4 id="Aware"><a href="#Aware" class="headerlink" title="Aware"></a>Aware</h4><p>BeanNameAware - 获取容器中BeanName</p>
+<p>BeanFactoryAware - 获得当前bean factory</p>
+<p>ApplicationContextAware - 当前的applicationContext,继承类ApplicationObjectSupport</p>
+<p>MessageSourceAware - 获取MessageSource，获取文本信息</p>
+<p>ApplicationEventPublisherAware - 应用事件发布器，发布事件</p>
+<p>ResourceLoaderAware - 获取资源加载器，获取外部资源</p>
+<h4 id="Conditional"><a href="#Conditional" class="headerlink" title="Conditional"></a>Conditional</h4><p>condition来match不同的条件，并进行不同的处理。</p>
+<h4 id="组合注解"><a href="#组合注解" class="headerlink" title="组合注解"></a>组合注解</h4><p>将多个元注解合并，定义为组合注解，简化配置。</p>
+<h4 id="Enable-注解"><a href="#Enable-注解" class="headerlink" title="Enable*注解"></a>Enable*注解</h4><p>@EnableAspectJAutoProxy开启对AspectJ自动代理的支持。</p>
+<p>@EnableAsync开启异步方法的支持。</p>
+<p>@EnableScheduling 开启计划任务的支持。</p>
+<p>@EnableWebMvc开启Web MVC的支持</p>
+<p>@EnableConfigurationProperties开启对@ConfigurationProperties注解配置Bean的支持。</p>
+<p>@EnableJpaRepositories开启对Spring DataJPA Repository的支持。</p>
+<p>@EnableTransactionManagement开启注解事务的支持。</p>
+<p>@EnableCaching开启注解式的缓存支持。</p>
+<p>所有Enable都包含一个@Import注解，用来导入配置类的。导入了一些自动配置的Bean。这些导入配置的方式主要分为三种类型:</p>
+<ul>
+<li>直接导入配置类</li>
+<li>依据条件选择配置类</li>
+<li>动态注册Bean</li>
+</ul>
+<p>servlet3.0可以通过webApplicationInitializer替代web.xml，实现该接口将会被SpringServletContainerInitializer获取到。</p>
+<p>通过重写WebMvcCOnfigureAdapter的addInterceptors方法来注册自定义的拦截器。</p>
+<p>@ControllerAdvice用于controller的全局配置，@ExceptionHandler 用于全局处理控制器的异常。</p>
+<p>@InitBinder，用来设置WebDataBinder，WebDataBinder用来自动绑定前台请求参数到model中。</p>
+<p>@ModelAttribute，绑定键值对到Model中，此处是让全局的@RequestMapping都能获得在此处设置的键值对。</p>
+<p>Spring通过MultipartResolver来上传文件。</p>
+<p>spring的消息推送</p>
+<ol>
+<li>RequestMapping中通过produces设置为「text/event-stream」来实现服务端往浏览器的消息推送。</li>
+<li>servlet3.0的异步方式，setAsyncSupported为true。</li>
+</ol>
+<p>@SpringBootApplication 注解组合了@Configuration，@EnableAutoConfiguration，@ComponentScan，</p>
+<p>可以通过exclude参数关闭特定的自动配置，如@SpringBootApplication(exclude={DataSourceAutoConfiguration.class})</p>
+<p>Banner定制src/main/resources下新建banner.txt。<a href="http://patorjk.com/software/taag生成字符。" target="_blank" rel="noopener">http://patorjk.com/software/taag生成字符。</a></p>
 ]]></content>
     
     <summary type="html">
